@@ -23,6 +23,7 @@ namespace BooleanRewrite
         public MainWindow()
         {
             InitializeComponent();
+            DataContext = new MainWindowViewModel();
         }
     }
 }

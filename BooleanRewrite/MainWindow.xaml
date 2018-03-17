@@ -6,7 +6,43 @@
         xmlns:local="clr-namespace:BooleanRewrite"
         mc:Ignorable="d"
         Title="MainWindow" Height="350" Width="525">
-    <Grid>
-        
-    </Grid>
+    <DockPanel>
+        <Menu DockPanel.Dock="Top">
+            <MenuItem Header="_File">
+                <MenuItem Header="Export..."/>
+                <MenuItem Header="_Close"/>
+            </MenuItem>
+            <MenuItem Header="Help"/>
+        </Menu>
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height=".3*"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+            <Grid HorizontalAlignment="Center" 
+                  VerticalAlignment="Center"
+                  Grid.Row="0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="2*"/>
+                    <ColumnDefinition/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <TextBox Grid.Column="0" 
+                         Text="{Binding InputText}"
+                         HorizontalAlignment="Stretch"
+                         MinWidth="200"/>
+                <Separator Grid.Column="1" Width="10" Visibility="Hidden"/>
+                <Button Grid.Column="2" 
+                        x:Name="test"
+                        Content="Evaluate" 
+                        Command="{Binding EvaluateCommand}"
+                        CommandParameter="{Binding ElementName=test}"/>
+            </Grid>
+            <TextBlock Grid.Row="1"
+                       HorizontalAlignment="Stretch"
+                       VerticalAlignment="Stretch"
+                       Margin="20"
+                       Text="{Binding OutputText}"/>
+        </Grid>
+    </DockPanel>
 </Window>

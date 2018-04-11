@@ -110,6 +110,9 @@ namespace BooleanRewrite
             Queue<Token> outputQueue = new Queue<Token>();
             Stack<Token> stack = new Stack<Token>();
 
+            int needOperand = 0;
+            int openParen = 0;
+
             int index = 0;
             while (infixTokenList.Count > index)
             {
@@ -119,11 +122,23 @@ namespace BooleanRewrite
                 {
                     case Token.TokenType.LITERAL:
                         outputQueue.Enqueue(t);
+                        if(needOperand > openParen)
+                        {
+                            outputQueue.Enqueue(stack.Pop());
+                            needOperand--;
+                        }
                         break;
                     case Token.TokenType.BINARY_OP:
-                    case Token.TokenType.UNARY_OP:
+                        stack.Push(t);
+                        break;
                     case Token.TokenType.OPEN_PAREN:
                         stack.Push(t);
+                        if(needOperand > 0)
+                            openParen++;
+                        break;
+                    case Token.TokenType.UNARY_OP:
+                        stack.Push(t);
+                        needOperand++;
                         break;
                     case Token.TokenType.CLOSE_PAREN:
                         while (stack.Peek().type != Token.TokenType.OPEN_PAREN)
@@ -134,6 +149,11 @@ namespace BooleanRewrite
                         if (stack.Count > 0 && stack.Peek().type == Token.TokenType.UNARY_OP)
                         {
                             outputQueue.Enqueue(stack.Pop());
+                        }
+                        if(needOperand>0)
+                        {
+                            openParen--;
+                            needOperand--;
                         }
                         break;
                     default:

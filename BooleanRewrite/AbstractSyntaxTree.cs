@@ -96,4 +96,15 @@ namespace BooleanRewrite
             }
         }
     }
+
+    static class Rewrite
+    {
+        public static void DeM(BoolExpr root)
+        {
+            if(root.Op == BoolExpr.BOP.NOT && root.Right.Op == BoolExpr.BOP.AND || root.Right.Op == BoolExpr.BOP.OR)
+            {
+                Console.WriteLine("DeM condition found.");
+            }
+        }
+    }
 }

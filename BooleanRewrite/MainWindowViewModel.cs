@@ -55,6 +55,8 @@ namespace BooleanRewrite
             enumerator.MoveNext();
             BoolExpr root = AST.Make(ref enumerator);
 
+            Rewrite.DeM(root);
+
             OutputText = AST.PrettyPrint(root);
         }
 

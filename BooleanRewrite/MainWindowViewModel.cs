@@ -58,7 +58,10 @@ namespace BooleanRewrite
             OutputText = AST.PrettyPrint(root);
         }
 
-
+        protected void EvaluateOnEnter(Object obj)
+        {
+            Evaluate();
+        }
 
         public ICommand EvaluateCommand
         {

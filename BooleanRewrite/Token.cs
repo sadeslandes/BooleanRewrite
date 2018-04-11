@@ -23,6 +23,9 @@ namespace BooleanRewrite
                 '!', new KeyValuePair<TokenType, string>(TokenType.UNARY_OP, "NOT")
             },
             {
+                '~', new KeyValuePair<TokenType, string>(TokenType.UNARY_OP, "NOT")
+            },
+            {
                 '&', new KeyValuePair<TokenType, string>(TokenType.BINARY_OP, "AND")
             },
             {

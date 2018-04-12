@@ -20,10 +20,10 @@ namespace BooleanRewrite
                 ')', new KeyValuePair<TokenType, string>(TokenType.CLOSE_PAREN, ")")
             },
             {
-                '!', new KeyValuePair<TokenType, string>(TokenType.NEGATION_OP, "NOT")
+                '!', new KeyValuePair<TokenType, string>(TokenType.UNARY_OP, "NOT")
             },
             {
-                '~', new KeyValuePair<TokenType, string>(TokenType.NEGATION_OP, "NOT")
+                '~', new KeyValuePair<TokenType, string>(TokenType.UNARY_OP, "NOT")
             },
             {
                 '&', new KeyValuePair<TokenType, string>(TokenType.BINARY_OP, "AND")
@@ -37,7 +37,7 @@ namespace BooleanRewrite
         {
             OPEN_PAREN,
             CLOSE_PAREN,
-            NEGATION_OP,
+            UNARY_OP,
             BINARY_OP,
             LITERAL,
             EXPR_END
@@ -110,8 +110,8 @@ namespace BooleanRewrite
             Queue<Token> outputQueue = new Queue<Token>();
             Stack<Token> stack = new Stack<Token>();
 
-            int needNegationOperand = 0;
-            int negationOperandInParenthesis = 0;
+            int needOperand = 0;
+            int openParen = 0;
 
             int index = 0;
             while (infixTokenList.Count > index)
@@ -122,10 +122,10 @@ namespace BooleanRewrite
                 {
                     case Token.TokenType.LITERAL:
                         outputQueue.Enqueue(t);
-                        if(needNegationOperand > negationOperandInParenthesis)
+                        if(needOperand > openParen)
                         {
                             outputQueue.Enqueue(stack.Pop());
-                            needNegationOperand--;
+                            needOperand--;
                         }
                         break;
                     case Token.TokenType.BINARY_OP:
@@ -133,12 +133,12 @@ namespace BooleanRewrite
                         break;
                     case Token.TokenType.OPEN_PAREN:
                         stack.Push(t);
-                        if(needNegationOperand > 0)
-                            negationOperandInParenthesis++;
+                        if(needOperand > 0)
+                            openParen++;
                         break;
-                    case Token.TokenType.NEGATION_OP:
+                    case Token.TokenType.UNARY_OP:
                         stack.Push(t);
-                        needNegationOperand++;
+                        needOperand++;
                         break;
                     case Token.TokenType.CLOSE_PAREN:
                         while (stack.Peek().type != Token.TokenType.OPEN_PAREN)
@@ -146,14 +146,14 @@ namespace BooleanRewrite
                             outputQueue.Enqueue(stack.Pop());
                         }
                         stack.Pop();
-                        if (stack.Count > 0 && stack.Peek().type == Token.TokenType.NEGATION_OP)
+                        if (stack.Count > 0 && stack.Peek().type == Token.TokenType.UNARY_OP)
                         {
                             outputQueue.Enqueue(stack.Pop());
                         }
-                        if(needNegationOperand>0)
+                        if(needOperand>0)
                         {
-                            negationOperandInParenthesis--;
-                            needNegationOperand--;
+                            openParen--;
+                            needOperand--;
                         }
                         break;
                     default:

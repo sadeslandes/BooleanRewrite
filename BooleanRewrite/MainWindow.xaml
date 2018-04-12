@@ -28,9 +28,15 @@
                     <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
                 <TextBox Grid.Column="0" 
-                         Text="{Binding InputText}"
+                         Text="{Binding InputText,UpdateSourceTrigger=PropertyChanged}"
                          HorizontalAlignment="Stretch"
-                         MinWidth="200"/>
+                         MinWidth="200">
+                    <TextBox.InputBindings>
+                        <KeyBinding Gesture="Enter"
+                                    Command="{Binding EvaluateCommand}"
+                                    CommandParameter="{Binding RelativeSource={RelativeSource FindAncestor,AncestorType={x:Type TextBox}}}"/>
+                    </TextBox.InputBindings>
+                </TextBox>
                 <Separator Grid.Column="1" Width="10" Visibility="Hidden"/>
                 <Button Grid.Column="2" 
                         x:Name="test"

@@ -99,12 +99,25 @@ namespace BooleanRewrite
 
     static class Rewrite
     {
-        public static void DeM(BoolExpr root)
+        public static void DeM(BoolExpr node)
         {
-            if(root.Op == BoolExpr.BOP.NOT && root.Right.Op == BoolExpr.BOP.AND || root.Right.Op == BoolExpr.BOP.OR)
+            if (node.Op == BoolExpr.BOP.LEAF) return;
+
+            if(node.Op == BoolExpr.BOP.NOT && node.Right.Op == BoolExpr.BOP.AND)
             {
-                Console.WriteLine("DeM condition found.");
+                var temp = node.Right;
+                node = BoolExpr.CreateOr(BoolExpr.CreateNot(temp.Left), BoolExpr.CreateNot(temp.Right));
+                //node.Left = BoolExpr.CreateNot(node.Left);
+                //node.Right = BoolExpr.CreateNot(node.Right);
             }
+
+            if(node.Op == BoolExpr.BOP.NOT && node.Right.Op == BoolExpr.BOP.OR)
+            {
+
+            }
+
+            DeM(node.Right);
+            if (node.Left != null) DeM(node.Left);
         }
     }
 }

@@ -40,6 +40,9 @@ namespace BooleanRewrite
 
         private void Evaluate()
         {
+#if DEBUG
+            Console.WriteLine("Re-running");
+#endif
             List<Token> tokens = null;
             var stripped = InputText.Replace(" ", String.Empty);
             try

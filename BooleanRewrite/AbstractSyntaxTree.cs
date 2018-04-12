@@ -8,6 +8,10 @@ namespace BooleanRewrite
 {
     static class AST
     {
+        const char _lnot = '\u00ac';
+        const char _land = '\u2227';
+        const char _lor = '\u2228';
+
         static public BoolExpr Make(ref List<Token>.Enumerator polishNotationTokensEnumerator)
         {
             if (polishNotationTokensEnumerator.Current.type == Token.TokenType.LITERAL)
@@ -61,7 +65,7 @@ namespace BooleanRewrite
             }
             else if (node.Op == BoolExpr.BOP.NOT)
             {
-                stringBuilder.Append('\u00ac');
+                stringBuilder.Append(_lnot);
                 //if (stringBuilder.Length == 0 || Char.IsWhiteSpace(stringBuilder[stringBuilder.Length - 1]))
                 //{
                 //    stringBuilder.Append("not ");
@@ -76,7 +80,7 @@ namespace BooleanRewrite
             {
                 stringBuilder.Append('(');
                 PrettyPrintHelper(ref stringBuilder, node.Left);
-                stringBuilder.Append('\u2227');
+                stringBuilder.Append(_land);
                 //stringBuilder.Append(" and ");
                 PrettyPrintHelper(ref stringBuilder, node.Right);
                 stringBuilder.Append(')');
@@ -86,9 +90,20 @@ namespace BooleanRewrite
                 stringBuilder.Append('(');
                 PrettyPrintHelper(ref stringBuilder, node.Left);
                 //stringBuilder.Append(" or ");
-                stringBuilder.Append('\u2228');
+                stringBuilder.Append(_lor);
                 PrettyPrintHelper(ref stringBuilder, node.Right);
                 stringBuilder.Append(')');
+            }
+        }
+    }
+
+    static class Rewrite
+    {
+        public static void DeM(BoolExpr root)
+        {
+            if(root.Op == BoolExpr.BOP.NOT && root.Right.Op == BoolExpr.BOP.AND || root.Right.Op == BoolExpr.BOP.OR)
+            {
+                Console.WriteLine("DeM condition found.");
             }
         }
     }

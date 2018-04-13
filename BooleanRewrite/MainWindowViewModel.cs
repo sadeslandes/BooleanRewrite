@@ -49,17 +49,33 @@ namespace BooleanRewrite
             {
                 tokens = Token.Tokenize(stripped);
             }
-            catch (InvalidInputException e)
+            catch (IllegalCharacterException)
             {
-                MessageBox.Show("Illegal syntax detected.\nValid characters include:\n\tAlphanumeric characters\n\tUnderscores (\"_\")\n\tOperators: \"!\", \"&\", \"|\"\n\nInput cannot end with an operator.");
+                MessageBox.Show("Illegal character detected.\nValid characters include:\n\tAlphanumeric characters and parentheses\n\tUnderscores (\"_\")\n\tOperators: \"!\", \"~\", \"&\", \"|\"\n\nInput cannot end with an operator.");
+                return;
+            }
+            catch (ParenthesisMismatchExeption)
+            {
+                MessageBox.Show("Number of parentheses do not match.");
                 return;
             }
 
             var enumerator = tokens.GetEnumerator();
             enumerator.MoveNext();
-            BoolExpr root = AST.Make(ref enumerator);
 
-            Rewrite.DeM(ref root);
+            BoolExpr root; 
+            try
+            {
+                root = AST.Make(ref enumerator);
+            }
+            catch (Exception)
+            {
+
+                MessageBox.Show("Could not parse expression.");
+                return;
+            }
+
+            //Rewrite.DeM(ref root);
 
             OutputText = AST.PrettyPrint(root);
         }

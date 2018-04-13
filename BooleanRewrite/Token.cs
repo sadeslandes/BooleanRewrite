@@ -20,10 +20,10 @@ namespace BooleanRewrite
                 ')', new KeyValuePair<TokenType, string>(TokenType.CLOSE_PAREN, ")")
             },
             {
-                '!', new KeyValuePair<TokenType, string>(TokenType.UNARY_OP, "NOT")
+                '!', new KeyValuePair<TokenType, string>(TokenType.NEGATION_OP, "NOT")
             },
             {
-                '~', new KeyValuePair<TokenType, string>(TokenType.UNARY_OP, "NOT")
+                '~', new KeyValuePair<TokenType, string>(TokenType.NEGATION_OP, "NOT")
             },
             {
                 '&', new KeyValuePair<TokenType, string>(TokenType.BINARY_OP, "AND")
@@ -37,7 +37,7 @@ namespace BooleanRewrite
         {
             OPEN_PAREN,
             CLOSE_PAREN,
-            UNARY_OP,
+            NEGATION_OP,
             BINARY_OP,
             LITERAL,
             EXPR_END
@@ -97,13 +97,17 @@ namespace BooleanRewrite
             return polishNotation;
         }
 
-        static Regex illegalRegex = new Regex(@"[^a-zA-Z0-9~!&|_-]");
+        static Regex illegalRegex = new Regex(@"[^a-zA-Z0-9~!&|()_-]");
         static void ValidateInput(string text)
         {
             var operators = "!&~|";
             if(illegalRegex.IsMatch(text) || operators.Contains(text.LastOrDefault()))
             {
-                throw new InvalidInputException();
+                throw new IllegalCharacterException();
+            }
+            if(text.Count(c => c=='(') != text.Count(c => c==')'))
+            {
+                throw new ParenthesisMismatchExeption();
             }
         }
 
@@ -111,9 +115,6 @@ namespace BooleanRewrite
         {
             Queue<Token> outputQueue = new Queue<Token>();
             Stack<Token> stack = new Stack<Token>();
-
-            int needOperand = 0;
-            int openParen = 0;
 
             int index = 0;
             while (infixTokenList.Count > index)
@@ -124,23 +125,15 @@ namespace BooleanRewrite
                 {
                     case Token.TokenType.LITERAL:
                         outputQueue.Enqueue(t);
-                        if(needOperand > openParen)
+                        while(stack.Count > 0 && stack.Peek().type == TokenType.NEGATION_OP)
                         {
                             outputQueue.Enqueue(stack.Pop());
-                            needOperand--;
                         }
                         break;
                     case Token.TokenType.BINARY_OP:
-                        stack.Push(t);
-                        break;
                     case Token.TokenType.OPEN_PAREN:
+                    case Token.TokenType.NEGATION_OP:
                         stack.Push(t);
-                        if(needOperand > 0)
-                            openParen++;
-                        break;
-                    case Token.TokenType.UNARY_OP:
-                        stack.Push(t);
-                        needOperand++;
                         break;
                     case Token.TokenType.CLOSE_PAREN:
                         while (stack.Peek().type != Token.TokenType.OPEN_PAREN)
@@ -148,14 +141,9 @@ namespace BooleanRewrite
                             outputQueue.Enqueue(stack.Pop());
                         }
                         stack.Pop();
-                        if (stack.Count > 0 && stack.Peek().type == Token.TokenType.UNARY_OP)
+                        while (stack.Count > 0 && stack.Peek().type == Token.TokenType.NEGATION_OP)
                         {
                             outputQueue.Enqueue(stack.Pop());
-                        }
-                        if(needOperand>0)
-                        {
-                            openParen--;
-                            needOperand--;
                         }
                         break;
                     default:
@@ -175,21 +163,41 @@ namespace BooleanRewrite
     }
 
     [Serializable]
-    internal class InvalidInputException : Exception
+    internal class ParenthesisMismatchExeption : Exception
     {
-        public InvalidInputException()
+        public ParenthesisMismatchExeption()
         {
         }
 
-        public InvalidInputException(string message) : base(message)
+        public ParenthesisMismatchExeption(string message) : base(message)
         {
         }
 
-        public InvalidInputException(string message, Exception innerException) : base(message, innerException)
+        public ParenthesisMismatchExeption(string message, Exception innerException) : base(message, innerException)
         {
         }
 
-        protected InvalidInputException(SerializationInfo info, StreamingContext context) : base(info, context)
+        protected ParenthesisMismatchExeption(SerializationInfo info, StreamingContext context) : base(info, context)
+        {
+        }
+    }
+
+    [Serializable]
+    internal class IllegalCharacterException : Exception
+    {
+        public IllegalCharacterException()
+        {
+        }
+
+        public IllegalCharacterException(string message) : base(message)
+        {
+        }
+
+        public IllegalCharacterException(string message, Exception innerException) : base(message, innerException)
+        {
+        }
+
+        protected IllegalCharacterException(SerializationInfo info, StreamingContext context) : base(info, context)
         {
         }
     }

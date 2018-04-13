@@ -117,15 +117,15 @@ namespace BooleanRewrite
                 node = BoolExpr.CreateAnd(BoolExpr.CreateNot(temp.Left), BoolExpr.CreateNot(temp.Right));
             }
 
-            var right = node.Right;
-            var left = node.Left;
-            DeM(ref right);
-            node.Right = right;
-            if (left != null)
-            {
-                DeM(ref left);
-                node.Left = left;
-            }
+            //var right = node.Right;
+            //var left = node.Left;
+            //DeM(ref right);
+            //node.Right = right;
+            //if (left != null)
+            //{
+            //    DeM(ref left);
+            //    node.Left = left;
+            //}
         }
 
         public static void DN(ref BoolExpr node)

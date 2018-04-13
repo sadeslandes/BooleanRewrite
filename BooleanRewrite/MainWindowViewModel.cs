@@ -70,12 +70,11 @@ namespace BooleanRewrite
             }
             catch (Exception)
             {
-
                 MessageBox.Show("Could not parse expression.");
                 return;
             }
 
-            //Rewrite.DeM(ref root);
+            AST.Evaluate(ref root);
 
             OutputText = AST.PrettyPrint(root);
         }

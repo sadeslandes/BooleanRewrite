@@ -23,6 +23,7 @@ namespace BooleanRewrite
         private BOP _op;
         private BoolExpr _left;
         private BoolExpr _right;
+        private BoolExpr _parent;
         private String _lit;
 
         //
@@ -35,6 +36,7 @@ namespace BooleanRewrite
             _left = left;
             _right = right;
             _lit = null;
+            _parent = null;
         }
 
         private BoolExpr(String literal)
@@ -43,6 +45,7 @@ namespace BooleanRewrite
             _left = null;
             _right = null;
             _lit = literal;
+            _parent = null;
         }
 
         //
@@ -65,6 +68,12 @@ namespace BooleanRewrite
         {
             get { return _right; }
             set { _right = value; }
+        }
+
+        public BoolExpr Parent
+        {
+            get { return _parent; }
+            set { _parent = value; }
         }
 
         public String Lit

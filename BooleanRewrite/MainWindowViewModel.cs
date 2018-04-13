@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -11,11 +12,6 @@ namespace BooleanRewrite
 {
     class MainWindowViewModel : ViewModelBase
     {
-        public MainWindowViewModel()
-        {
-            OutputText = "Initialized";
-        }
-
         string inputText;
         public string InputText
         {
@@ -27,16 +23,7 @@ namespace BooleanRewrite
             }
         }
 
-        string outputText;
-        public string OutputText
-        {
-            get { return outputText; }
-            set
-            {
-                outputText = value;
-                OnPropertyChanged();
-            }
-        }
+        public IList<ConversionStep> Steps { get; private set; }
 
         private void Evaluate()
         {
@@ -74,9 +61,8 @@ namespace BooleanRewrite
                 return;
             }
 
-            AST.Evaluate(ref root);
-
-            OutputText = AST.PrettyPrint(root);
+            Steps = AST.Evaluate(ref root);
+            OnPropertyChanged(nameof(Steps));
         }
 
         public ICommand EvaluateCommand
@@ -86,5 +72,16 @@ namespace BooleanRewrite
                 return new RelayCommand(o=>Evaluate(),o=>!String.IsNullOrEmpty(InputText));
             }
         }
+    }
+
+    public class ConversionStep
+    {
+        public ConversionStep(string exp, string justification)
+        {
+            Expression = exp;
+            Justification = justification;
+        }
+        public string Expression { get; }
+        public string Justification { get; }
     }
 }

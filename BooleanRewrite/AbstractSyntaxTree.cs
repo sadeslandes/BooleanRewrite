@@ -96,36 +96,67 @@ namespace BooleanRewrite
             }
         }
 
-        public static void Evaluate(ref BoolExpr root)
+        public static IList<ConversionStep> Evaluate(ref BoolExpr root)
         {
+            var steps = new List<ConversionStep>();
+            steps.Add(new ConversionStep(PrettyPrint(root), "Input"));
+
             if(!IsNNF(root))
             {
-                ConvertToNNF(ref root);
+                ConvertToNNF(ref root, steps, ref root);
             }
             Debug.Assert(IsNNF(root));
 
             if (!IsDNF(root))
             {
-                ConvertNNFtoDNF(ref root);
+                ConvertNNFtoDNF(ref root, steps, ref root);
             }
             Debug.Assert(IsDNF(root));
+
+            return steps;
         }
 
-        static void ConvertNNFtoDNF(ref BoolExpr node)
+        static void ConvertToNNF(ref BoolExpr node, IList<ConversionStep> steps, ref BoolExpr root)
+        {
+            if (node == null || node.Op == BoolExpr.BOP.LEAF)
+                return;
+
+            // try to apply DN as many times as possible
+            while(Rewrite.DN(ref node, ref root))
+            {
+                steps.Add(new ConversionStep(PrettyPrint(node), "Double Negation"));
+            }
+
+            // try to apply DeM
+            if(Rewrite.DeM(ref node, ref root))
+            {
+                steps.Add(new ConversionStep(PrettyPrint(node), "DeMorgan's"));
+            }
+
+
+            var right = node.Right;
+            var left = node.Left;
+            ConvertToNNF(ref right, steps, ref root);
+            ConvertToNNF(ref left, steps, ref root);
+            node.Right = right;
+            node.Left = left;
+        }
+
+        static void ConvertNNFtoDNF(ref BoolExpr node, IList<ConversionStep> steps, ref BoolExpr root)
         {
             if (node == null || node.Op == BoolExpr.BOP.LEAF)
                 return;
 
             // try to apply distribution
-            if (Rewrite.Distribution(ref node))
+            if (Rewrite.Distribution(ref node, ref root))
             {
-                Console.WriteLine(PrettyPrint(node));
+                steps.Add(new ConversionStep(PrettyPrint(node), "Distribution"));
             }
 
             var right = node.Right;
             var left = node.Left;
-            ConvertNNFtoDNF(ref right);
-            ConvertNNFtoDNF(ref left);
+            ConvertNNFtoDNF(ref right, steps, ref root);
+            ConvertNNFtoDNF(ref left, steps, ref root);
             node.Right = right;
             node.Left = left;
         }
@@ -147,31 +178,6 @@ namespace BooleanRewrite
             }
         }
 
-        static void ConvertToNNF(ref BoolExpr node)
-        {
-            if (node == null || node.Op == BoolExpr.BOP.LEAF)
-                return;
-
-            // try to apply DN as many times as possible
-            while(Rewrite.DN(ref node))
-            {
-                Console.WriteLine(PrettyPrint(node));
-            }
-
-            // try to apply DeM
-            if(Rewrite.DeM(ref node))
-            {
-                Console.WriteLine(PrettyPrint(node));
-            }
-
-
-            var right = node.Right;
-            var left = node.Left;
-            ConvertToNNF(ref right);
-            ConvertToNNF(ref left);
-            node.Right = right;
-            node.Left = left;
-        }
 
         static bool IsNNF(BoolExpr node)
         {
@@ -192,7 +198,7 @@ namespace BooleanRewrite
 
     static class Rewrite
     {
-        public static bool Distribution(ref BoolExpr node)
+        public static bool Distribution(ref BoolExpr node, ref BoolExpr root)
         {
             if (node.Op == BoolExpr.BOP.AND)
             {
@@ -207,6 +213,10 @@ namespace BooleanRewrite
                     node = BoolExpr.CreateOr(left, right);
                     left.Parent = node;
                     right.Parent = node;
+                    if (node.Parent == null)
+                    {
+                        root = node;
+                    }
                     return true;
                 }
                 else if (node.Left.Op == BoolExpr.BOP.OR)
@@ -220,13 +230,17 @@ namespace BooleanRewrite
                     node = BoolExpr.CreateOr(left, right);
                     left.Parent = node;
                     right.Parent = node;
+                    if (node.Parent == null)
+                    {
+                        root = node;
+                    }
                     return true;
                 }
             }
             return false;
         }
 
-        public static bool DeM(ref BoolExpr node)
+        public static bool DeM(ref BoolExpr node, ref BoolExpr root)
         {
             if(node.Op == BoolExpr.BOP.NOT)
             {
@@ -238,6 +252,10 @@ namespace BooleanRewrite
                     node = BoolExpr.CreateOr(left, right);
                     left.Parent = node;
                     right.Parent = node;
+                    if (node.Parent == null)
+                    {
+                        root = node;
+                    }
                     return true;
                 }
                 else if (node.Right.Op == BoolExpr.BOP.OR)
@@ -248,19 +266,27 @@ namespace BooleanRewrite
                     node = BoolExpr.CreateAnd(left, right);
                     left.Parent = node;
                     right.Parent = node;
+                    if (node.Parent == null)
+                    {
+                        root = node;
+                    }
                     return true;
                 }
             }
             return false;
         }
 
-        public static bool DN(ref BoolExpr node)
+        public static bool DN(ref BoolExpr node, ref BoolExpr root)
         {
             if(node.Op == BoolExpr.BOP.NOT && node.Right.Op == BoolExpr.BOP.NOT)
             {
                 var old_parent = node.Parent;
                 node = node.Right.Right;
                 node.Parent = old_parent;
+                if (node.Parent == null)
+                {
+                    root = node;
+                }
                 return true;
             }
             return false;

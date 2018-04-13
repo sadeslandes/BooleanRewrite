@@ -45,11 +45,39 @@
                         Command="{Binding EvaluateCommand}"
                         CommandParameter="{Binding ElementName=test}"/>
             </Grid>
-            <TextBlock Grid.Row="1"
-                       HorizontalAlignment="Stretch"
-                       VerticalAlignment="Stretch"
-                       Margin="20"
-                       Text="{Binding OutputText}"/>
+
+
+            <DataGrid Grid.Row="1"  
+                      ItemsSource="{Binding Steps}" 
+                      Margin="20"
+                      IsReadOnly="True"
+                      CanUserResizeRows="False"
+                      CanUserAddRows="False"
+                      CanUserDeleteRows="False"
+                      AutoGenerateColumns="False"
+                      HeadersVisibility="Column">
+                <DataGrid.Columns>
+                    <DataGridTemplateColumn Header="Expression" Width="*" IsReadOnly="True">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding Expression}" Padding="3 0"/>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+                    <DataGridTemplateColumn Header="Justification" Width="SizeToCells" MinWidth="75" IsReadOnly="True">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding Justification}" Padding="3 0"/>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+                    
+                </DataGrid.Columns>
+            </DataGrid>
+
+
+
+
         </Grid>
     </DockPanel>
 </Window>

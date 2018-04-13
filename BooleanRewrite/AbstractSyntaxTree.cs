@@ -69,7 +69,7 @@ namespace BooleanRewrite
             return null;
         }
 
-        public string PrettyPrint()
+        public override string ToString()
         {
             StringBuilder output = new StringBuilder();
 
@@ -113,7 +113,7 @@ namespace BooleanRewrite
         public IList<ConversionStep> Evaluate()
         {
             var steps = new List<ConversionStep>();
-            steps.Add(new ConversionStep(PrettyPrint(), "Input"));
+            steps.Add(new ConversionStep(ToString(), "Input"));
 
             if(!IsNNF(Root))
             {
@@ -150,7 +150,7 @@ namespace BooleanRewrite
                 {
                     Root = node;
                 }
-                steps.Add(new ConversionStep(PrettyPrint(), "Double Negation"));
+                steps.Add(new ConversionStep(ToString(), "Double Negation"));
             }
 
             // try to apply DeM
@@ -160,7 +160,7 @@ namespace BooleanRewrite
                 {
                     Root = node;
                 }
-                steps.Add(new ConversionStep(PrettyPrint(), "DeMorgan's"));
+                steps.Add(new ConversionStep(ToString(), "DeMorgan's"));
             }
 
 
@@ -184,7 +184,7 @@ namespace BooleanRewrite
                 {
                     Root = node;
                 }
-                steps.Add(new ConversionStep(PrettyPrint(), "Distribution"));
+                steps.Add(new ConversionStep(ToString(), "Distribution"));
             }
 
             var right = node.Right;
@@ -231,6 +231,24 @@ namespace BooleanRewrite
 
     static class Rewrite
     {
+        public static bool ComplementIdentity(ref BoolExpr node)
+        {
+            if(node.Op == BoolExpr.BOP.AND)
+            {
+                if(node.Left.Op == BoolExpr.BOP.NOT)
+                {
+                    if(node.Left.Right == node.Right)
+                    {
+                        
+                    }
+                }
+                else if(node.Right.Op == BoolExpr.BOP.NOT)
+                {
+
+                }
+            }
+        }
+
         public static bool Distribution(ref BoolExpr node)
         {
             if (node.Op == BoolExpr.BOP.AND)
@@ -272,7 +290,6 @@ namespace BooleanRewrite
             }
             return false;
         }
-
 
         public static bool DeM(ref BoolExpr node)
         {

@@ -47,13 +47,11 @@ namespace BooleanRewrite
                 return;
             }
 
-            var enumerator = tokens.GetEnumerator();
-            enumerator.MoveNext();
 
-            BoolExpr root; 
+            AST tree;
             try
             {
-                root = AST.Make(ref enumerator);
+                tree = new AST(tokens);
             }
             catch (Exception)
             {
@@ -61,7 +59,7 @@ namespace BooleanRewrite
                 return;
             }
 
-            Steps = AST.Evaluate(ref root);
+            Steps = tree.Evaluate();
             OnPropertyChanged(nameof(Steps));
         }
 

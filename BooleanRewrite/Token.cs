@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace BooleanRewrite
 {
-    class Token
+    public class Token
     {
         static Dictionary<char, KeyValuePair<TokenType, string>> dict = new Dictionary<char, KeyValuePair<TokenType, string>>()
         {

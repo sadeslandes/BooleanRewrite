@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace BooleanRewrite
 {
-    class BoolExpr
+    public class BoolExpr
     {
         public enum BOP
         {

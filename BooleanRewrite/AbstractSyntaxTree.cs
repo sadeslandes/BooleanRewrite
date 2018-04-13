@@ -113,7 +113,21 @@ namespace BooleanRewrite
 
         static void ConvertNNFtoDNF(ref BoolExpr node)
         {
+            if (node == null || node.Op == BoolExpr.BOP.LEAF)
+                return;
 
+            // try to apply distribution
+            if (Rewrite.Distribution(ref node))
+            {
+                Console.WriteLine(PrettyPrint(node));
+            }
+
+            var right = node.Right;
+            var left = node.Left;
+            ConvertNNFtoDNF(ref right);
+            ConvertNNFtoDNF(ref left);
+            node.Right = right;
+            node.Left = left;
         }
 
         static bool IsDNF(BoolExpr node)
@@ -123,8 +137,9 @@ namespace BooleanRewrite
                 case BoolExpr.BOP.LEAF:
                     return true;
                 case BoolExpr.BOP.AND:
+                    return IsDNF(node.Right) && IsDNF(node.Left);
                 case BoolExpr.BOP.OR:
-                    return IsNNF(node.Right) && IsNNF(node.Left);
+                    return  (node.Parent == null || node.Parent.Op == BoolExpr.BOP.OR) && IsDNF(node.Right) && IsDNF(node.Left);
                 case BoolExpr.BOP.NOT:
                     return node.Right.Op == BoolExpr.BOP.LEAF;
                 default:
@@ -177,6 +192,40 @@ namespace BooleanRewrite
 
     static class Rewrite
     {
+        public static bool Distribution(ref BoolExpr node)
+        {
+            if (node.Op == BoolExpr.BOP.AND)
+            {
+                if (node.Right.Op == BoolExpr.BOP.OR)
+                {
+                    var oldRight = node.Right;
+                    var oldLeft = node.Left;
+
+                    var left = BoolExpr.CreateAnd(oldLeft, oldRight.Left);
+                    var right = BoolExpr.CreateAnd(oldLeft, oldRight.Right);
+
+                    node = BoolExpr.CreateOr(left, right);
+                    left.Parent = node;
+                    right.Parent = node;
+                    return true;
+                }
+                else if (node.Left.Op == BoolExpr.BOP.OR)
+                {
+                    var oldRight = node.Right;
+                    var oldLeft = node.Left;
+
+                    var left = BoolExpr.CreateAnd(oldLeft.Left, oldRight);
+                    var right = BoolExpr.CreateAnd(oldLeft.Right, oldRight);
+
+                    node = BoolExpr.CreateOr(left, right);
+                    left.Parent = node;
+                    right.Parent = node;
+                    return true;
+                }
+            }
+            return false;
+        }
+
         public static bool DeM(ref BoolExpr node)
         {
             if(node.Op == BoolExpr.BOP.NOT)

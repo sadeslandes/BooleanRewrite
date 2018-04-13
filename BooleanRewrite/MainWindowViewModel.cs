@@ -52,27 +52,23 @@ namespace BooleanRewrite
             catch (InvalidInputException e)
             {
                 MessageBox.Show("Illegal syntax detected.\nValid characters include:\n\tAlphanumeric characters\n\tUnderscores (\"_\")\n\tOperators: \"!\", \"&\", \"|\"\n\nInput cannot end with an operator.");
+                return;
             }
 
             var enumerator = tokens.GetEnumerator();
             enumerator.MoveNext();
             BoolExpr root = AST.Make(ref enumerator);
 
-            Rewrite.DeM(root);
+            Rewrite.DeM(ref root);
 
             OutputText = AST.PrettyPrint(root);
-        }
-
-        protected void EvaluateOnEnter(Object obj)
-        {
-            Evaluate();
         }
 
         public ICommand EvaluateCommand
         {
             get
             {
-                return new RelayCommand(o=>Evaluate());
+                return new RelayCommand(o=>Evaluate(),o=>!String.IsNullOrEmpty(InputText));
             }
         }
     }

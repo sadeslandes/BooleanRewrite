@@ -99,7 +99,7 @@ namespace BooleanRewrite
 
     static class Rewrite
     {
-        public static void DeM(BoolExpr node)
+        public static void DeM(ref BoolExpr node)
         {
             if (node.Op == BoolExpr.BOP.LEAF) return;
 
@@ -111,13 +111,48 @@ namespace BooleanRewrite
                 //node.Right = BoolExpr.CreateNot(node.Right);
             }
 
-            if(node.Op == BoolExpr.BOP.NOT && node.Right.Op == BoolExpr.BOP.OR)
+            if (node.Op == BoolExpr.BOP.NOT && node.Right.Op == BoolExpr.BOP.OR)
             {
-
+                var temp = node.Right;
+                node = BoolExpr.CreateAnd(BoolExpr.CreateNot(temp.Left), BoolExpr.CreateNot(temp.Right));
             }
 
-            DeM(node.Right);
-            if (node.Left != null) DeM(node.Left);
+            var right = node.Right;
+            var left = node.Left;
+            DeM(ref right);
+            node.Right = right;
+            if (left != null)
+            {
+                DeM(ref left);
+                node.Left = left;
+            }
+        }
+
+        public static void DN(ref BoolExpr node)
+        {
+            if (node.Op == BoolExpr.BOP.LEAF) return;
+
+            if(node.Op == BoolExpr.BOP.NOT && node.Right.Op == BoolExpr.BOP.AND)
+            {
+                var temp = node.Right;
+                node = BoolExpr.CreateOr(BoolExpr.CreateNot(temp.Left), BoolExpr.CreateNot(temp.Right));
+            }
+
+            if (node.Op == BoolExpr.BOP.NOT && node.Right.Op == BoolExpr.BOP.OR)
+            {
+                var temp = node.Right;
+                node = BoolExpr.CreateAnd(BoolExpr.CreateNot(temp.Left), BoolExpr.CreateNot(temp.Right));
+            }
+            
+            //var right = node.Right;
+            //var left = node.Left;
+            //DeM(ref right);
+            //node.Right = right;
+            //if (left != null)
+            //{
+            //    DeM(ref left);
+            //    node.Left = left;
+            //}
         }
     }
 }

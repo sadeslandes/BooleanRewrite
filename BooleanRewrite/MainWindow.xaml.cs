@@ -24,6 +24,7 @@ namespace BooleanRewrite
         {
             InitializeComponent();
             DataContext = new MainWindowViewModel();
+            inputBox.Focus();
         }
     }
 }

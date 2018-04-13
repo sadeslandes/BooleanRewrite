@@ -78,6 +78,8 @@ namespace BooleanRewrite
 
         public static List<Token> Tokenize(string text)
         {
+            ValidateInput(text);
+
             List<Token> tokens = new List<Token>();
             StringReader reader = new StringReader(text);
 
@@ -95,10 +97,10 @@ namespace BooleanRewrite
             return polishNotation;
         }
 
-        static Regex illegalRegex = new Regex(@"^[a-zA-Z_0-9!&|]");
+        static Regex illegalRegex = new Regex(@"[^a-zA-Z0-9~!&|_-]");
         static void ValidateInput(string text)
         {
-            var operators = "!&|";
+            var operators = "!&~|";
             if(illegalRegex.IsMatch(text) || operators.Contains(text.LastOrDefault()))
             {
                 throw new InvalidInputException();

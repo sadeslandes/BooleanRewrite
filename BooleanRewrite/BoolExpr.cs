@@ -17,35 +17,25 @@ namespace BooleanRewrite
         };
 
         //
-        //  inner state
-        //
-
-        private BOP _op;
-        private BoolExpr _left;
-        private BoolExpr _right;
-        private BoolExpr _parent;
-        private String _lit;
-
-        //
         //  private constructor
         //
 
         private BoolExpr(BOP op, BoolExpr left, BoolExpr right)
         {
-            _op = op;
-            _left = left;
-            _right = right;
-            _lit = null;
-            _parent = null;
+            Op = op;
+            Left = left;
+            Right = right;
+            Lit = null;
+            Parent = null;
         }
 
         private BoolExpr(String literal)
         {
-            _op = BOP.LEAF;
-            _left = null;
-            _right = null;
-            _lit = literal;
-            _parent = null;
+            Op = BOP.LEAF;
+            Left = null;
+            Right = null;
+            Lit = literal;
+            Parent = null;
         }
 
         //public static bool operator ==(BoolExpr exp1, BoolExpr exp2)
@@ -59,35 +49,15 @@ namespace BooleanRewrite
         //  accessor
         //
 
-        public BOP Op
-        {
-            get { return _op; }
-            set { _op = value; }
-        }
+        public BOP Op { get; set; }
 
-        public BoolExpr Left
-        {
-            get { return _left; }
-            set { _left = value; }
-        }
+        public BoolExpr Left { get; set; }
 
-        public BoolExpr Right
-        {
-            get { return _right; }
-            set { _right = value; }
-        }
+        public BoolExpr Right { get; set; }
 
-        public BoolExpr Parent
-        {
-            get { return _parent; }
-            set { _parent = value; }
-        }
+        public BoolExpr Parent { get; set; }
 
-        public String Lit
-        {
-            get { return _lit; }
-            set { _lit = value; }
-        }
+        public String Lit { get; set; }
 
         //
         //  public factory
@@ -113,27 +83,59 @@ namespace BooleanRewrite
             return new BoolExpr(str);
         }
 
+        public static BoolExpr CreateContradiction()
+        {
+            return new BoolExpr("\u22a5");
+        }
+
+        
+
+
         public BoolExpr(BoolExpr other)
         {
             // No share any object on purpose
-            _op = other._op;
-            _left = other._left == null ? null : new BoolExpr(other._left);
-            _right = other._right == null ? null : new BoolExpr(other._right);
-            _lit = new StringBuilder(other._lit).ToString();
+            Op = other.Op;
+            Left = other.Left == null ? null : new BoolExpr(other.Left);
+            Right = other.Right == null ? null : new BoolExpr(other.Right);
+            Lit = new StringBuilder(other.Lit).ToString();
         }
 
         //
         //  state checker
         //
 
-        Boolean IsLeaf()
+        public bool IsLeaf()
         {
-            return (_op == BOP.LEAF);
+            return (Op == BOP.LEAF);
         }
 
-        Boolean IsAtomic()
+        public bool IsLiteral()
         {
-            return (IsLeaf() || (_op == BOP.NOT && _left.IsLeaf()));
+            return (IsLeaf() || (Op == BOP.NOT && Right.IsLeaf()));
         }
+
+        public bool IsContradiction() => Lit == "\u22a5";
+        public bool IsContradiction2()
+        {
+            if(this.Op == BOP.AND)
+            {
+                if(this.Right.Op == BOP.NOT)
+                {
+                    if(this.Right.Right == this.Left)
+                    {
+                        return true;
+                    }
+                }
+                if (this.Left.Op == BOP.NOT)
+                {
+                    if (this.Left.Right == this.Right)
+                    {
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
+        
     }
 }

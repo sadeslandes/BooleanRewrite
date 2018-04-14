@@ -112,12 +112,13 @@ namespace BooleanRewrite
 
         public IList<ConversionStep> Evaluate()
         {
+            BoolExpr root;
             var steps = new List<ConversionStep>();
             steps.Add(new ConversionStep(ToString(), "Input"));
 
             if(!IsNNF(Root))
             {
-                var root = Root;
+                root = Root;
                 ConvertToNNF(ref root, steps);
                 Root = root;
             }
@@ -125,17 +126,43 @@ namespace BooleanRewrite
 
             if (!IsDNF(Root))
             {
-                var root = Root;
+                root = Root;
                 ConvertNNFtoDNF(ref root, steps);
                 Root = root;
             }
             Debug.Assert(IsDNF(Root));
 
             // TODO: clean-up using complement then identity
-            
+            root = Root;
+            RemoveIdentities(ref root, steps);
+            Root = root;
+            Debug.Assert(IsDNF(Root));
+
             // TODO: convert to CDNF
 
             return steps;
+        }
+
+        private void RemoveIdentities(ref BoolExpr node, List<ConversionStep> steps)
+        {
+            if (node == null || node.Op == BoolExpr.BOP.LEAF)
+                return;
+
+            if(Rewrite.ComplementIdentity(ref node))
+            {
+                if (node.Parent == null)
+                {
+                    Root = node;
+                }
+                steps.Add(new ConversionStep(ToString(), "Identity"));
+            }
+
+            var right = node.Right;
+            var left = node.Left;
+            RemoveIdentities(ref right, steps);
+            RemoveIdentities(ref left, steps);
+            node.Right = right;
+            node.Left = left;
         }
 
         void ConvertToNNF(ref BoolExpr node, IList<ConversionStep> steps)
@@ -233,20 +260,46 @@ namespace BooleanRewrite
     {
         public static bool ComplementIdentity(ref BoolExpr node)
         {
-            if(node.Op == BoolExpr.BOP.AND)
+            bool rewriteCondition = false;
+            BoolExpr other;
+
+            if (node.Op == BoolExpr.BOP.AND && node.Parent != null)
             {
                 if(node.Left.Op == BoolExpr.BOP.NOT)
                 {
                     if(node.Left.Right == node.Right)
                     {
-                        
+                        rewriteCondition = true;
                     }
                 }
                 else if(node.Right.Op == BoolExpr.BOP.NOT)
                 {
-
+                    if (node.Right.Right.Lit == node.Left.Lit)
+                    {
+                        rewriteCondition = true;
+                    }
                 }
             }
+
+            if (rewriteCondition)
+            {
+                if (node.Parent.Left == node)
+                {
+                    other = node.Parent.Right;
+                }
+                else
+                {
+                    other = node.Parent.Left;
+                }
+
+                var newParent = node.Parent.Parent;
+                node = other;
+                other.Parent = newParent;
+
+                return true;
+            }
+
+            return false;
         }
 
         public static bool Distribution(ref BoolExpr node)

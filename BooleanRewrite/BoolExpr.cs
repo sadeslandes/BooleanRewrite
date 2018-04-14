@@ -48,6 +48,13 @@ namespace BooleanRewrite
             _parent = null;
         }
 
+        //public static bool operator ==(BoolExpr exp1, BoolExpr exp2)
+        //{
+        //    return exp1.IsLeaf() && exp2.IsLeaf() && exp1.Lit == exp2.Lit;
+        //}
+
+        //public static bool operator !=(BoolExpr exp1, BoolExpr exp2) => !(exp1 == exp2);
+
         //
         //  accessor
         //

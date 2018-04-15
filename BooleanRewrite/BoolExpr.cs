@@ -78,7 +78,7 @@ namespace BooleanRewrite
 
         public static BoolExpr CreateContradiction()
         {
-            return new BoolExpr("\u22a5");
+            return new BoolExpr(LogicalSymbols.Falsum.ToString());
         }
 
         
@@ -107,7 +107,7 @@ namespace BooleanRewrite
             return (IsLeaf() || (Op == BOP.NOT && Right.IsLeaf()));
         }
 
-        public bool IsContradiction() => Lit == "\u22a5";
+        public bool IsContradiction() => Lit == LogicalSymbols.Falsum.ToString();
 
         // unsused test
         public bool IsContradiction2()

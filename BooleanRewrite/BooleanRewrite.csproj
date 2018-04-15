@@ -57,6 +57,7 @@
     </ApplicationDefinition>
     <Compile Include="AbstractSyntaxTree.cs" />
     <Compile Include="BoolExpr.cs" />
+    <Compile Include="LogicalSymbols.cs" />
     <Compile Include="MainWindowViewModel.cs" />
     <Compile Include="RelayCommand.cs" />
     <Compile Include="Token.cs" />

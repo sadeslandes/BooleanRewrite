@@ -17,10 +17,6 @@ namespace BooleanRewrite
             Root = Make(ref enumerator);
         }
 
-        const char _lnot = '\u00ac';
-        const char _land = '\u2227';
-        const char _lor = '\u2228';
-
         public BoolExpr Root
         {
             get;
@@ -89,14 +85,14 @@ namespace BooleanRewrite
             }
             else if (node.Op == BoolExpr.BOP.NOT)
             {
-                stringBuilder.Append(_lnot);
+                stringBuilder.Append(LogicalSymbols.Not);
                 PrettyPrintHelper(stringBuilder, node.Right);
             }
             else if (node.Op == BoolExpr.BOP.AND)
             {
                 stringBuilder.Append('(');
                 PrettyPrintHelper(stringBuilder, node.Left);
-                stringBuilder.Append(_land);
+                stringBuilder.Append(LogicalSymbols.And);
                 PrettyPrintHelper(stringBuilder, node.Right);
                 stringBuilder.Append(')');
             }
@@ -104,7 +100,7 @@ namespace BooleanRewrite
             {
                 stringBuilder.Append('(');
                 PrettyPrintHelper(stringBuilder, node.Left);
-                stringBuilder.Append(_lor);
+                stringBuilder.Append(LogicalSymbols.Or);
                 PrettyPrintHelper(stringBuilder, node.Right);
                 stringBuilder.Append(')');
             }

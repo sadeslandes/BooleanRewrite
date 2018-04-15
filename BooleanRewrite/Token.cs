@@ -20,16 +20,13 @@ namespace BooleanRewrite
                 ')', new KeyValuePair<TokenType, string>(TokenType.CLOSE_PAREN, ")")
             },
             {
-                '!', new KeyValuePair<TokenType, string>(TokenType.NEGATION_OP, "NOT")
+                LogicalSymbols.Not, new KeyValuePair<TokenType, string>(TokenType.NEGATION_OP, "NOT")
             },
             {
-                '~', new KeyValuePair<TokenType, string>(TokenType.NEGATION_OP, "NOT")
+                LogicalSymbols.And, new KeyValuePair<TokenType, string>(TokenType.BINARY_OP, "AND")
             },
             {
-                '&', new KeyValuePair<TokenType, string>(TokenType.BINARY_OP, "AND")
-            },
-            {
-                '|', new KeyValuePair<TokenType, string>(TokenType.BINARY_OP, "OR")
+                LogicalSymbols.Or, new KeyValuePair<TokenType, string>(TokenType.BINARY_OP, "OR")
             }
         };
 
@@ -97,10 +94,10 @@ namespace BooleanRewrite
             return polishNotation;
         }
 
-        static Regex illegalRegex = new Regex(@"[^a-zA-Z0-9~!&|()_-]");
+        static Regex illegalRegex = new Regex($"[^a-zA-Z0-9()_-{LogicalSymbols.Operators}]");
         static void ValidateInput(string text)
         {
-            var operators = "!&~|";
+            var operators = LogicalSymbols.Operators;
             if(illegalRegex.IsMatch(text) || operators.Contains(text.LastOrDefault()))
             {
                 throw new IllegalCharacterException();

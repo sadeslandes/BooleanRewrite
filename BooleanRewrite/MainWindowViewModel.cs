@@ -18,7 +18,18 @@ namespace BooleanRewrite
             get { return inputText; }
             set
             {
-                inputText = value;
+                if(String.IsNullOrEmpty(value))
+                {
+                    inputText = "";
+                }
+                else
+                {
+                    value = value.Replace('&',LogicalSymbols.And);
+                    value = value.Replace('|',LogicalSymbols.Or);
+                    value = value.Replace('!',LogicalSymbols.Not);
+                    value = value.Replace('~',LogicalSymbols.Not);
+                    inputText = value;
+                }
                 OnPropertyChanged();
             }
         }

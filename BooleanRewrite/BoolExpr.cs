@@ -38,13 +38,6 @@ namespace BooleanRewrite
             Parent = null;
         }
 
-        //public static bool operator ==(BoolExpr exp1, BoolExpr exp2)
-        //{
-        //    return exp1.IsLeaf() && exp2.IsLeaf() && exp1.Lit == exp2.Lit;
-        //}
-
-        //public static bool operator !=(BoolExpr exp1, BoolExpr exp2) => !(exp1 == exp2);
-
         //
         //  accessor
         //
@@ -115,6 +108,8 @@ namespace BooleanRewrite
         }
 
         public bool IsContradiction() => Lit == "\u22a5";
+
+        // unsused test
         public bool IsContradiction2()
         {
             if(this.Op == BOP.AND)

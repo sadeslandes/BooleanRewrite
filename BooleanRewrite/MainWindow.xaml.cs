@@ -26,5 +26,7 @@ namespace BooleanRewrite
             DataContext = new MainWindowViewModel();
             inputBox.Focus();
         }
+
+        private void CloseCommandHandler(object sender, ExecutedRoutedEventArgs e) => Close();
     }
 }

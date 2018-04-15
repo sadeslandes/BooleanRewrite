@@ -151,6 +151,14 @@ namespace BooleanRewrite
             if (node == null || node.Op == BoolExpr.BOP.LEAF)
                 return;
 
+
+            var right = node.Right;
+            var left = node.Left;
+            RemoveIdentities(ref left, steps);
+            RemoveIdentities(ref right, steps);
+            node.Right = right;
+            node.Left = left;
+            
             // try to apply Identity as many times as possible
             while (Rewrite.Identity(ref node))
             {
@@ -160,13 +168,6 @@ namespace BooleanRewrite
                 }
                 steps.Add(new ConversionStep(ToString(), "Identity"));
             }
-
-            var right = node.Right;
-            var left = node.Left;
-            RemoveIdentities(ref left, steps);
-            RemoveIdentities(ref right, steps);
-            node.Right = right;
-            node.Left = left;
         }
 
         private void GenerateComplement(ref BoolExpr node, List<ConversionStep> steps)
@@ -182,16 +183,6 @@ namespace BooleanRewrite
                 }
                 steps.Add(new ConversionStep(ToString(), "Complement"));
             }
-
-            // try to apply Identity as many times as possible
-            //while (Rewrite.Identity(ref node))
-            //{
-            //    if (node.Parent == null)
-            //    {
-            //        Root = node;
-            //    }
-            //    steps.Add(new ConversionStep(ToString(), "Identity"));
-            //}
 
             var right = node.Right;
             var left = node.Left;
@@ -293,41 +284,7 @@ namespace BooleanRewrite
     }
 
     static class Rewrite
-    {
-        public static bool ComplementIdentity(ref BoolExpr node)
-        {
-            bool result = false;
-            if (node.Op == BoolExpr.BOP.OR)
-            {
-                var left = node.Left;
-                var right = node.Right;
-                if (node.Left.IsContradiction2())
-                {
-                    var oldNode = node;
-                    if(node.Right.IsContradiction2())
-                    {
-                        node = BoolExpr.CreateContradiction();
-                    }
-                    else
-                    {
-                        node = node.Right;
-                    }
-                    UpdateParent(node, oldNode);
-                    
-                    result = true;
-                }
-
-                else if (Complement(ref right))
-                {
-                    var oldNode = node;
-                    node = node.Left;
-                    UpdateParent(node, oldNode);
-                    result = true;
-                }
-            }
-
-            return result;
-        }
+    {   
 
         public static bool Identity(ref BoolExpr node)
         {
@@ -337,6 +294,7 @@ namespace BooleanRewrite
                 {
                     var oldNode = node;
                     node = node.Right;
+                    node.Parent = oldNode.Parent;
                     UpdateParent(node, oldNode);
                     return true;
                 }
@@ -345,10 +303,12 @@ namespace BooleanRewrite
                 {
                     var oldNode = node;
                     node = node.Left;
+                    node.Parent = oldNode.Parent;
                     UpdateParent(node, oldNode);
                     return true;
                 }
             }
+
             return false;
         }
 
@@ -360,7 +320,7 @@ namespace BooleanRewrite
             {
                 if(node.Left.Op == BoolExpr.BOP.NOT)
                 {
-                    if(node.Left.Right == node.Right)
+                    if(node.Left.Right.Lit == node.Right.Lit)
                     {
                         rewriteCondition = true;
                     }
@@ -380,30 +340,6 @@ namespace BooleanRewrite
                 node = BoolExpr.CreateContradiction();
                 node.Parent = oldNode.Parent;
                 UpdateParent(node, oldNode);
-                //if (node.Parent.Left == node)
-                //{
-                //    other = node.Parent.Right;
-                //}
-                //else
-                //{
-                //    other = node.Parent.Left;
-                //}
-
-                //var newParent = node.Parent.Parent;
-                //node = other;
-
-                //if(newParent!=null)
-                //{
-                //    if (newParent.Left == node.Parent)
-                //    {
-                //        newParent.Left = node;
-                //    }
-                //    else
-                //    {
-                //        newParent.Right = node;
-                //    }
-                //}
-                //node.Parent = newParent;
 
                 return true;
             }
@@ -516,6 +452,52 @@ namespace BooleanRewrite
             {
                 node.Parent.Right = node;
             }
+        }
+        
+        // unused test
+        public static bool ComplementIdentity(ref BoolExpr node)
+        {
+            bool result = false;
+            if (node.Op == BoolExpr.BOP.OR)
+            {
+                var left = node.Left;
+                var right = node.Right;
+                if (node.Left.IsContradiction2())
+                {
+                    var oldNode = node;
+                    if(node.Right.IsContradiction2())
+                    {
+                        node = BoolExpr.CreateContradiction();
+                    }
+                    else
+                    {
+                        node = node.Right;
+                    }
+                    node.Parent = oldNode.Parent;
+                    UpdateParent(node, oldNode);
+                    
+                    result = true;
+                }
+
+                else if (node.Right.IsContradiction2())
+                {
+                    var oldNode = node;
+                    if (node.Left.IsContradiction2())
+                    {
+                        node = BoolExpr.CreateContradiction();
+                    }
+                    else
+                    {
+                        node = node.Left;
+                    }
+                    node.Parent = oldNode.Parent;
+                    UpdateParent(node, oldNode);
+
+                    result = true;
+                }
+            }
+
+            return result;
         }
     }
 }

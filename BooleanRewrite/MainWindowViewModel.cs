@@ -81,6 +81,19 @@ namespace BooleanRewrite
                 return new RelayCommand(o=>Evaluate(),o=>!String.IsNullOrEmpty(InputText));
             }
         }
+
+        public ICommand AppendTextCommand
+        {
+            get
+            {
+                return new RelayCommand(o=>AppendText(o as string));
+            }
+        }
+
+        private void AppendText(string text)
+        {
+            InputText += text;
+        }
     }
 
     public class ConversionStep

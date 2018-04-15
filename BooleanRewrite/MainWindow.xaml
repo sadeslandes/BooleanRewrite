@@ -6,11 +6,19 @@
         xmlns:local="clr-namespace:BooleanRewrite"
         mc:Ignorable="d"
         Title="MainWindow" Height="350" Width="525">
+    <Window.Resources>
+        <Style x:Key="LogicalSymbolButtonStyle" TargetType="Button">
+            <Setter Property="Width" Value="17.6"/>
+            <Setter Property="Height" Value="17.6"/>
+            <Setter Property="Padding" Value="0"/>
+            <Setter Property="Margin" Value="0 0 3 5"/>
+        </Style>
+    </Window.Resources>
     <Window.CommandBindings>
         <CommandBinding Command="ApplicationCommands.Close" 
                         Executed="CloseCommandHandler"/>
     </Window.CommandBindings>
-    <DockPanel>
+        <DockPanel>
         <Menu DockPanel.Dock="Top">
             <MenuItem Header="_File">
                 <MenuItem Header="Export..."/>
@@ -26,33 +34,43 @@
                 <RowDefinition Height=".3*"/>
                 <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
-            
-            <Grid HorizontalAlignment="Center" 
+
+            <StackPanel HorizontalAlignment="Center" 
                   VerticalAlignment="Center"
                   Grid.Row="0">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="2*"/>
-                    <ColumnDefinition/>
-                    <ColumnDefinition Width="*"/>
-                </Grid.ColumnDefinitions>
-                <TextBox Grid.Column="0" 
-                         Text="{Binding InputText,UpdateSourceTrigger=PropertyChanged}"
-                         HorizontalAlignment="Stretch"
-                         MinWidth="200"
-                         x:Name="inputBox">
-                    <TextBox.InputBindings>
-                        <KeyBinding Gesture="Enter"
-                                    Command="{Binding EvaluateCommand}"
-                                    CommandParameter="{Binding RelativeSource={RelativeSource FindAncestor,AncestorType={x:Type TextBox}}}"/>
-                    </TextBox.InputBindings>
-                </TextBox>
-                <Separator Grid.Column="1" Width="10" Visibility="Hidden"/>
-                <Button Grid.Column="2" 
-                        x:Name="test"
-                        Content="Evaluate" 
-                        Command="{Binding EvaluateCommand}"
-                        CommandParameter="{Binding ElementName=test}"/>
-            </Grid>
+                <StackPanel Orientation="Horizontal">
+                    <Button Content="&#x00ac;" Style="{StaticResource LogicalSymbolButtonStyle}" ToolTip="! or ~" Command="{Binding AppendTextCommand}" CommandParameter="&#x00ac;"/>
+                    <Button Content="&#x2227;" Style="{StaticResource LogicalSymbolButtonStyle}" ToolTip="&amp;" Command="{Binding AppendTextCommand}" CommandParameter="&#x2227;"/>
+                    <Button Content="&#x2228;" Style="{StaticResource LogicalSymbolButtonStyle}" ToolTip="|" Command="{Binding AppendTextCommand}" CommandParameter="&#x2228;"/>
+                    <Button Content="&#x2192;" Style="{StaticResource LogicalSymbolButtonStyle}" ToolTip="%" Command="{Binding AppendTextCommand}" CommandParameter="&#x2192;"/>
+                    <Button Content="&#x2194;" Style="{StaticResource LogicalSymbolButtonStyle}" ToolTip="$" Command="{Binding AppendTextCommand}" CommandParameter="&#x2194;"/>
+                    <Button Content="&#x22bb;" Style="{StaticResource LogicalSymbolButtonStyle}" ToolTip="#" Command="{Binding AppendTextCommand}" CommandParameter="&#x22bb;"/>
+                </StackPanel>
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="2*"/>
+                        <ColumnDefinition/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBox Grid.Column="0" 
+                             Text="{Binding InputText,UpdateSourceTrigger=PropertyChanged}"
+                             HorizontalAlignment="Stretch"
+                             MinWidth="200"
+                             x:Name="inputBox">
+                        <TextBox.InputBindings>
+                            <KeyBinding Gesture="Enter"
+                                        Command="{Binding EvaluateCommand}"
+                                        CommandParameter="{Binding RelativeSource={RelativeSource FindAncestor,AncestorType={x:Type TextBox}}}"/>
+                        </TextBox.InputBindings>
+                    </TextBox>
+                    <Separator Grid.Column="1" Width="10" Visibility="Hidden"/>
+                    <Button Grid.Column="2" 
+                            x:Name="test"
+                            Content="Evaluate" 
+                            Command="{Binding EvaluateCommand}"
+                            CommandParameter="{Binding ElementName=test}"/>
+                </Grid>
+            </StackPanel>
 
             <DataGrid x:Name="dataGrid"
                       Grid.Row="1"  

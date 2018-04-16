@@ -44,10 +44,5 @@ namespace BooleanRewrite
         {
             needMoveCursor = true;
         }
-
-        private void inputBox_TextChanged_1(object sender, TextChangedEventArgs e)
-        {
-
-        }
     }
 }

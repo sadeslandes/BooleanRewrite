@@ -281,7 +281,6 @@ namespace BooleanRewrite
 
     static class Rewrite
     {   
-
         public static bool Identity(ref BoolExpr node)
         {
             if(node.Op == BoolExpr.BOP.OR)

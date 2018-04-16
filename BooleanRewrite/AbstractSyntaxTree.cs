@@ -128,16 +128,9 @@ namespace BooleanRewrite
             }
             Debug.Assert(IsDNF(Root));
 
-            // TODO: clean-up using complement then identity
-            root = Root;
-            GenerateComplement(ref root, steps);
-            Root = root;
-
-            RemoveIdentities(ref root, steps);
-            Root = root;
-            Debug.Assert(IsDNF(Root));
-
-            // TODO: convert to CDNF
+            // convert to DNFList
+            var d = new DNF(Root, new string[] { "P","Q","R" });
+            steps.Add(new ConversionStep(d.ToString(), "Generalize operators"));
 
             return steps;
         }

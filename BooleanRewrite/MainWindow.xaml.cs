@@ -20,6 +20,7 @@ namespace BooleanRewrite
     /// </summary>
     public partial class MainWindow : Window
     {
+        bool needMoveCursor = false;
         public MainWindow()
         {
             InitializeComponent();
@@ -28,5 +29,25 @@ namespace BooleanRewrite
         }
 
         private void CloseCommandHandler(object sender, ExecutedRoutedEventArgs e) => Close();
+
+        private void inputBox_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            if(needMoveCursor)
+            {
+                inputBox.Focus();
+                inputBox.CaretIndex = inputBox.Text.Length;
+                needMoveCursor = false;
+            }
+        }
+
+        private void Button_Click(object sender, RoutedEventArgs e)
+        {
+            needMoveCursor = true;
+        }
+
+        private void inputBox_TextChanged_1(object sender, TextChangedEventArgs e)
+        {
+
+        }
     }
 }

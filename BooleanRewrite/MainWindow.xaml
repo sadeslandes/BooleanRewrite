@@ -39,12 +39,12 @@
                   VerticalAlignment="Center"
                   Grid.Row="0">
                 <StackPanel Orientation="Horizontal">
-                    <Button Content="&#x00ac;" Style="{StaticResource LogicalSymbolButtonStyle}" ToolTip="! or ~" Command="{Binding AppendTextCommand}" CommandParameter="&#x00ac;"/>
-                    <Button Content="&#x2227;" Style="{StaticResource LogicalSymbolButtonStyle}" ToolTip="&amp;" Command="{Binding AppendTextCommand}" CommandParameter="&#x2227;"/>
-                    <Button Content="&#x2228;" Style="{StaticResource LogicalSymbolButtonStyle}" ToolTip="|" Command="{Binding AppendTextCommand}" CommandParameter="&#x2228;"/>
-                    <Button Content="&#x2192;" Style="{StaticResource LogicalSymbolButtonStyle}" ToolTip="%" Command="{Binding AppendTextCommand}" CommandParameter="&#x2192;"/>
-                    <Button Content="&#x2194;" Style="{StaticResource LogicalSymbolButtonStyle}" ToolTip="$" Command="{Binding AppendTextCommand}" CommandParameter="&#x2194;"/>
-                    <Button Content="&#x22bb;" Style="{StaticResource LogicalSymbolButtonStyle}" ToolTip="#" Command="{Binding AppendTextCommand}" CommandParameter="&#x22bb;"/>
+                    <Button Content="&#x00ac;" Style="{StaticResource LogicalSymbolButtonStyle}" ToolTip="! or ~" Command="{Binding AppendTextCommand}" CommandParameter="&#x00ac;" Click="Button_Click"/>
+                    <Button Content="&#x2227;" Style="{StaticResource LogicalSymbolButtonStyle}" ToolTip="&amp;" Command="{Binding AppendTextCommand}" CommandParameter="&#x2227;" Click="Button_Click"/>
+                    <Button Content="&#x2228;" Style="{StaticResource LogicalSymbolButtonStyle}" ToolTip="|" Command="{Binding AppendTextCommand}" CommandParameter="&#x2228;" Click="Button_Click"/>
+                    <Button Content="&#x2192;" Style="{StaticResource LogicalSymbolButtonStyle}" ToolTip="%" Command="{Binding AppendTextCommand}" CommandParameter="&#x2192;" Click="Button_Click"/>
+                    <Button Content="&#x2194;" Style="{StaticResource LogicalSymbolButtonStyle}" ToolTip="$" Command="{Binding AppendTextCommand}" CommandParameter="&#x2194;" Click="Button_Click"/>
+                    <Button Content="&#x22bb;" Style="{StaticResource LogicalSymbolButtonStyle}" ToolTip="#" Command="{Binding AppendTextCommand}" CommandParameter="&#x22bb;" Click="Button_Click"/>
                 </StackPanel>
                 <Grid>
                     <Grid.ColumnDefinitions>
@@ -56,7 +56,7 @@
                              Text="{Binding InputText,UpdateSourceTrigger=PropertyChanged}"
                              HorizontalAlignment="Stretch"
                              MinWidth="200"
-                             x:Name="inputBox">
+                             x:Name="inputBox" TextChanged="inputBox_TextChanged">
                         <TextBox.InputBindings>
                             <KeyBinding Gesture="Enter"
                                         Command="{Binding EvaluateCommand}"

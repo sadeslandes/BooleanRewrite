@@ -11,11 +11,12 @@ namespace BooleanRewrite
         public const char And = '\u2227';
         public const char Not = '\u00ac';
         public const char Or = '\u2228';
-        public const char Falsum = '\u22a5';
+        public const char Contradiction = '\u22a5';
+        public const char Tautology = '\u22a4';
         public const char Conditional = '\u2192';
         public const char Biconditional = '\u2194';
         public const char XOr = '\u22bb';
 
-        public static readonly string Operators = "" + And + Not + Or + Falsum + Conditional + Biconditional + XOr;
+        public static readonly string Operators = "" + And + Not + Or + Contradiction + Conditional + Biconditional + XOr;
     }
 }

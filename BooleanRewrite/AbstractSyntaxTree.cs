@@ -131,7 +131,7 @@ namespace BooleanRewrite
             // convert to DNFList
             var d = new DNF(Root, new string[] { "P","Q","R" });
             steps.Add(new ConversionStep(d.ToString(), "Generalize operators"));
-
+            d.ConvertToCDNF(steps);
             return steps;
         }
 

@@ -42,24 +42,51 @@ namespace BooleanRewrite
 
         public void ConvertToCDNF(IList<ConversionStep> steps)
         {
-            foreach(var group in expressionList)
+            for(int i=0;i<expressionList.Count;)
             {
+                bool incrementCounter = true;
                 foreach(var variable in variables)
                 {
+                    var group = expressionList[i];
                     int varCount = group.Count(x => x.Name == variable);
+                    var originalGroup = new List<DNFLiteral>(group);
                     if (varCount > 1)
                     {
                         // remove variable using complement and identity, or idempotence
                     }
-                    else if(varCount < 1)
+                    if(varCount < 1)
                     {
                         // add variable using identity, complement, then distribution
+                        // identity
+                        group.Add(new DNFLiteral() { Name = $"{LogicalSymbols.Tautology}", isNegated = false, priority = Int32.MaxValue });
+                        steps.Add(new ConversionStep(ToString(), "Identity"));
+                        // complement
+                        group.Remove(group.Last());
+                        var newPositive = new DNFLiteral() { Name = variable, isNegated = false, priority = variables.IndexOf(variable) };
+                        var newNegative = new DNFLiteral() { Name = variable, isNegated = true, priority = variables.IndexOf(variable) };
+                        group.Add(new DNFLiteral() { Name = $"({newPositive.Text}{LogicalSymbols.Or}{newNegative.Text})", priority = Int32.MaxValue });
+                        steps.Add(new ConversionStep(ToString(), "Complement"));
+                        // distribute
+                        expressionList.RemoveAt(i);
+                        var positiveGroup = originalGroup;
+                        var negativeGroup = new List<DNFLiteral>(originalGroup);
+                        positiveGroup.Add(newPositive);
+                        expressionList.Insert(i, positiveGroup);
+                        negativeGroup.Add(newNegative);
+                        expressionList.Insert(i, negativeGroup);
+                        steps.Add(new ConversionStep(ToString(), "Distribution"));
+
+                        incrementCounter = false;
                     }
                     // order group
-                    group.Sort();
+                    expressionList[i].Sort();
+                }
+                if(incrementCounter)
+                {
+                    i++;
                 }
             }
-            expressionList.Sort(this);
+            //expressionList.Sort(this);
         }
 
         public override string ToString()

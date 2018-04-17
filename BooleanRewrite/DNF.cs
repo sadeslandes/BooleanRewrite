@@ -52,7 +52,46 @@ namespace BooleanRewrite
                     var originalGroup = new List<DNFLiteral>(group);
                     if (varCount > 1)
                     {
-                        // remove variable using complement and identity, or idempotence
+                        bool removed = false;
+
+                        // remove duplicates
+                        while(group.Count(x => x.Name == variable && !x.isNegated) > 1)
+                        {
+                            group.Remove(group.First(x => x.Name == variable && !x.isNegated));
+                            removed = true;
+                        }
+                        if(removed)
+                        {
+                            steps.Add(new ConversionStep(ToString(), "Idempotence"));
+                            removed = false;
+                        }
+
+                        while (group.Count(x => x.Name == variable && x.isNegated) > 1)
+                        {
+                            group.Remove(group.First(x => x.Name == variable && x.isNegated));
+                            removed = true;
+                        }
+                        if (removed)
+                        {
+                            steps.Add(new ConversionStep(ToString(), "Idempotence"));
+                            removed = false;
+                        }
+
+                        // remove contradiction
+                        if (group.Count(x => x.Name == variable) > 1)
+                        {
+                            group.RemoveAll(x => x.Name == variable);
+                            group.Add(new DNFLiteral() { Name = LogicalSymbols.Contradiction.ToString() });
+                            steps.Add(new ConversionStep(ToString(), "Complement"));
+                            group.RemoveAll(x => x.Name != LogicalSymbols.Contradiction.ToString());
+                            steps.Add(new ConversionStep(ToString(), "Annihilation"));
+                            expressionList.Remove(expressionList[i]);
+                            steps.Add(new ConversionStep(ToString(), "Identity"));
+                            incrementCounter = false;
+                            break;
+                        }
+
+
                     }
                     if(varCount < 1)
                     {

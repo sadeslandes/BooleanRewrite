@@ -19,7 +19,7 @@ namespace BooleanRewrite
         }
     }
 
-    class DNFConjunctionGroup : List<DNFLiteral>, IComparable<DNFConjunctionGroup>
+    class DNFConjunctionGroup : List<DNFLiteral>, IComparable<DNFConjunctionGroup>, IEquatable<DNFConjunctionGroup>
     {
         public DNFConjunctionGroup() : base() { }
         public DNFConjunctionGroup(DNFConjunctionGroup other) : base(other) { }
@@ -29,6 +29,22 @@ namespace BooleanRewrite
             string binaryX = String.Join("", this.Select(l => l.isNegated ? "1" : "0"));
             string binaryY = String.Join("", other.Select(l => l.isNegated ? "1" : "0"));
             return Convert.ToInt32(binaryX, 2).CompareTo(Convert.ToInt32(binaryY, 2));
+        }
+
+        public bool Equals(DNFConjunctionGroup other)
+        {
+            return this.GetHashCode() == other.GetHashCode();
+        }
+
+        public override int GetHashCode()
+        {
+            int hash = 0;
+            foreach (var literal in this)
+            {
+                hash += literal.Text.GetHashCode();
+            }
+            hash *= this.Count;
+            return hash;
         }
 
         public override string ToString()
@@ -142,11 +158,22 @@ namespace BooleanRewrite
                     // order group
                     expressionList[i].Sort();
                 }
-                if(incrementCounter)
+                if (incrementCounter)
                 {
                     i++;
                 }
             }
+            // to show proper ordering within conjunctions
+            steps.Add(new ConversionStep(ToString(), "Commutation"));
+
+            // check for duplicates
+            if (expressionList.Distinct().Count() != expressionList.Count)
+            {
+                expressionList = expressionList.Distinct().ToList();
+                steps.Add(new ConversionStep(ToString(), "Idempotence"));
+            }
+
+            // to show proper ordering among disjunctions
             expressionList.Sort();
             steps.Add(new ConversionStep(ToString(), "Commutation"));
         }

@@ -19,33 +19,46 @@ namespace BooleanRewrite
         }
     }
 
-    //class DNFConjunctionGroup : IComparable<DNFConjunctionGroup>
-    //{
-    //    List<DNFLiteral> group;
-    //    public DNFConjunctionGroup(params )
-    //    {
-    //        group
-    //    }
-    //}
-
-    class DNF : IComparer<List<DNFLiteral>>
+    class DNFConjunctionGroup : List<DNFLiteral>, IComparable<DNFConjunctionGroup>
     {
+        public DNFConjunctionGroup() : base() { }
+        public DNFConjunctionGroup(DNFConjunctionGroup other) : base(other) { }
 
-        private List<List<DNFLiteral>> expressionList;
-        private List<string> variables;
-
-        public DNF(BoolExpr root, IEnumerable<string> variables)
+        public int CompareTo(DNFConjunctionGroup other)
         {
-            this.variables = variables.ToList();
-            expressionList = new List<List<DNFLiteral>>();
-            buildListFromTree(root);
+            string binaryX = String.Join("", this.Select(l => l.isNegated ? "1" : "0"));
+            string binaryY = String.Join("", other.Select(l => l.isNegated ? "1" : "0"));
+            return Convert.ToInt32(binaryX, 2).CompareTo(Convert.ToInt32(binaryY, 2));
         }
 
-        public int Compare(List<DNFLiteral> x, List<DNFLiteral> y)
+        public override string ToString()
         {
-            string binaryX = String.Join("",x.Select(l => l.isNegated ? "1" : "0"));
-            string binaryY = String.Join("",y.Select(l => l.isNegated ? "1" : "0"));
-            return Convert.ToInt32(binaryX, 2).CompareTo(Convert.ToInt32(binaryY, 2));
+            var sb = new StringBuilder();
+            if (Count > 1) sb.Append("(");
+            foreach(var literal in this)
+            {
+                sb.Append(literal.ToString());
+                if(literal != this.Last())
+                {
+                    sb.Append(LogicalSymbols.And);
+                }
+            }
+            if (Count > 1) sb.Append(")");
+            return sb.ToString();
+        }
+    }
+
+    class DNFExpression
+    {
+
+        private List<DNFConjunctionGroup> expressionList;
+        private List<string> variables;
+
+        public DNFExpression(BoolExpr root, IEnumerable<string> variables)
+        {
+            this.variables = variables.ToList();
+            expressionList = new List<DNFConjunctionGroup>();
+            buildListFromTree(root);
         }
 
         public void ConvertToCDNF(IList<ConversionStep> steps)
@@ -57,7 +70,7 @@ namespace BooleanRewrite
                 {
                     var group = expressionList[i];
                     int varCount = group.Count(x => x.Name == variable);
-                    var originalGroup = new List<DNFLiteral>(group);
+                    var originalGroup = new DNFConjunctionGroup(group);
                     if (varCount > 1)
                     {
                         bool removed = false;
@@ -103,7 +116,8 @@ namespace BooleanRewrite
                     }
                     if(varCount < 1)
                     {
-                        // add variable using identity, complement, then distribution
+                        // Need to add variable
+
                         // identity
                         group.Add(new DNFLiteral() { Name = $"{LogicalSymbols.Tautology}", isNegated = false, priority = Int32.MaxValue });
                         steps.Add(new ConversionStep(ToString(), "Identity"));
@@ -116,7 +130,7 @@ namespace BooleanRewrite
                         // distribute
                         expressionList.RemoveAt(i);
                         var positiveGroup = originalGroup;
-                        var negativeGroup = new List<DNFLiteral>(originalGroup);
+                        var negativeGroup = new DNFConjunctionGroup(originalGroup);
                         negativeGroup.Add(newNegative);
                         expressionList.Insert(i, negativeGroup);
                         positiveGroup.Add(newPositive);
@@ -133,7 +147,7 @@ namespace BooleanRewrite
                     i++;
                 }
             }
-            expressionList.Sort(this);
+            expressionList.Sort();
             steps.Add(new ConversionStep(ToString(), "Commutation"));
         }
 
@@ -144,22 +158,7 @@ namespace BooleanRewrite
             for (int i = 0; i < expressionList.Count; i++)
             {
                 var group = expressionList[i];
-                if (group.Count > 1)
-                {
-                    sb.Append('(');
-                } 
-                for (int j = 0; j < group.Count; j++)
-                {
-                    sb.Append(group[j].Text);
-                    if (j != group.Count - 1)
-                    {
-                        sb.Append(LogicalSymbols.And);
-                    }
-                }
-                if(group.Count>1)
-                {
-                    sb.Append(')');
-                }
+                sb.Append(group.ToString());
                 if(i != expressionList.Count-1)
                 {
                     sb.Append(LogicalSymbols.Or);
@@ -176,7 +175,7 @@ namespace BooleanRewrite
 
             if (node.Op != BoolExpr.BOP.OR)
             {
-                var group = new List<DNFLiteral>();
+                var group = new DNFConjunctionGroup();
                 buildNode(node, group);
                 group.Sort();
                 expressionList.Add(group);
@@ -188,7 +187,7 @@ namespace BooleanRewrite
             
         }
 
-        private void buildNode(BoolExpr node, List<DNFLiteral> group)
+        private void buildNode(BoolExpr node, IList<DNFLiteral> group)
         {
             if (node == null)
                 return;

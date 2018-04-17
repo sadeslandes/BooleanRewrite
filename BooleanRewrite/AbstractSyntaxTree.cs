@@ -129,7 +129,7 @@ namespace BooleanRewrite
             Debug.Assert(IsDNF(Root));
 
             // convert to DNFList
-            var d = new DNF(Root, new string[] { "P","Q","R" });
+            var d = new DNFExpression(Root, new string[] { "P","Q","R" });
             steps.Add(new ConversionStep(d.ToString(), "Generalize operators"));
             d.ConvertToCDNF(steps);
             return steps;

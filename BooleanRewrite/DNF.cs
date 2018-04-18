@@ -77,7 +77,7 @@ namespace BooleanRewrite
             buildListFromTree(root);
         }
 
-        public void ConvertToCDNF(IList<ConversionStep> steps)
+        public void ConvertToCDNF(IList<ConversionStep> steps, bool reverseOrder)
         {
             for(int i=0;i<expressionList.Count;)
             {
@@ -175,7 +175,12 @@ namespace BooleanRewrite
 
             // to show proper ordering among disjunctions
             expressionList.Sort();
+            if(reverseOrder)
+            {
+                expressionList.Reverse();
+            }
             steps.Add(new ConversionStep(ToString(), "Commutation"));
+
         }
 
         public override string ToString()

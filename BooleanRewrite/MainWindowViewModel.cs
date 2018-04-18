@@ -34,6 +34,24 @@ namespace BooleanRewrite
             }
         }
 
+        
+        private string variables;
+        public string Variables
+        {
+            get
+            {
+                return variables;
+            }
+            set
+            {
+                variables = string.Concat(value.Where(c => !char.IsWhiteSpace(c)));
+                OnPropertyChanged();
+            }
+        }
+
+        public bool ReverseOrder { get; set; } = false;
+
+
         public IList<ConversionStep> Steps { get; private set; }
 
         private void Evaluate()
@@ -41,6 +59,13 @@ namespace BooleanRewrite
 #if DEBUG
             Console.WriteLine("Re-running");
 #endif
+            var variablesList = Variables.Split(',').Where(s => !String.IsNullOrEmpty(s));
+            if(variablesList.Count() == 0)
+            {
+                MessageBox.Show("No variable names given.\n\nType all desired variable names (seperated by commas) into the variables textbox.","Error");
+                return;
+            }
+
             List<Token> tokens = null;
             var stripped = InputText.Replace(" ", String.Empty);
             try
@@ -70,7 +95,7 @@ namespace BooleanRewrite
                 return;
             }
 
-            Steps = tree.Evaluate();
+            Steps = tree.Evaluate(variablesList, ReverseOrder);
             OnPropertyChanged(nameof(Steps));
         }
 

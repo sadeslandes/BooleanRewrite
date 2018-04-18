@@ -106,7 +106,7 @@ namespace BooleanRewrite
             }
         }
 
-        public IList<ConversionStep> Evaluate()
+        public IList<ConversionStep> Evaluate(IEnumerable<string> variables, bool reverse = false)
         {
             BoolExpr root;
             var steps = new List<ConversionStep>();
@@ -129,9 +129,9 @@ namespace BooleanRewrite
             Debug.Assert(IsDNF(Root));
 
             // convert to DNFList
-            var d = new DNFExpression(Root, new string[] { "P","Q","R" });
+            var d = new DNFExpression(Root, variables);
             steps.Add(new ConversionStep(d.ToString(), "Generalize operators"));
-            d.ConvertToCDNF(steps);
+            d.ConvertToCDNF(steps, reverse);
             return steps;
         }
 

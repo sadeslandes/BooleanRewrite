@@ -209,7 +209,7 @@ namespace BooleanRewrite
             {
                 var group = new DNFConjunctionGroup();
                 buildNode(node, group);
-                group.Sort();
+                //group.Sort();
                 expressionList.Add(group);
                 return;
             }

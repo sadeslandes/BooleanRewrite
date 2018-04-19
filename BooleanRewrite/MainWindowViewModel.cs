@@ -7,6 +7,7 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
+using System.Windows.Media;
 
 namespace BooleanRewrite
 {
@@ -30,6 +31,7 @@ namespace BooleanRewrite
                     value = value.Replace('~', LogicalSymbols.Not);
                     inputText = value;
                 }
+                ResetResults();
                 OnPropertyChanged();
             }
         }
@@ -52,6 +54,7 @@ namespace BooleanRewrite
                     value = value.Replace('~', LogicalSymbols.Not);
                     inputText2 = value;
                 }
+                ResetResults();
                 OnPropertyChanged();
             }
         }
@@ -67,27 +70,90 @@ namespace BooleanRewrite
             set
             {
                 variables = string.Concat(value.Where(c => !char.IsWhiteSpace(c)));
+                ResetResults();
+                OnPropertyChanged();
+            }
+        }
+
+        private string resultText;
+        public string ResultText
+        {
+            get
+            {
+                return resultText;
+            }
+            set
+            {
+                resultText = value;
+                OnPropertyChanged();
+            }
+        }
+
+        private Brush resultColor = Brushes.Transparent;
+        public Brush ResultColor
+        {
+            get
+            {
+                return resultColor;
+            }
+            set
+            {
+                resultColor = value;
                 OnPropertyChanged();
             }
         }
 
         public bool ReverseOrder { get; set; } = false;
 
-
-        public IList<ConversionStep> Steps { get; private set; }
+        public IList<ConversionStep> Steps1 { get; private set; }
+        public IList<ConversionStep> Steps2 { get; private set; }
 
         private void Evaluate()
         {
-#if DEBUG
-            Console.WriteLine("Re-running");
-#endif
-            var variablesList = Variables.Split(',').Where(s => !String.IsNullOrEmpty(s));
+            IEnumerable<string> variablesList = Variables.Split(',').Where(s => !String.IsNullOrEmpty(s));
             if(variablesList.Count() == 0)
             {
                 MessageBox.Show("No variable names given.\n\nType all desired variable names (seperated by commas) into the variables textbox.","Error");
                 return;
             }
 
+            if(!String.IsNullOrWhiteSpace(InputText))
+            {
+                EvaluateExpression1(variablesList);
+            }
+            if(!String.IsNullOrWhiteSpace(InputText2))
+            {
+                EvaluateExpression2(variablesList);
+            }
+
+            checkEquivalence();
+        }
+
+        private void checkEquivalence()
+        {
+            if(Steps1 !=  null && Steps1.Count > 0 && Steps2 != null && Steps2.Count > 0)
+            {
+                if (Steps1.Last().Expression == Steps2.Last().Expression)
+                {
+                    ResultText = "Equivalent!";
+                    ResultColor = Brushes.Green;
+                }
+                else
+                {
+                    ResultText = "Not equivalent";
+                    ResultColor = Brushes.Red;
+                }
+            }
+        }
+
+        private void ResetResults()
+        {
+            ResultColor = Brushes.Transparent;
+            ResultText = String.Empty;
+        }
+
+        private void EvaluateExpression1(IEnumerable<string> variables)
+        {
             List<Token> tokens = null;
             var stripped = InputText.Replace(" ", String.Empty);
             try
@@ -117,15 +183,50 @@ namespace BooleanRewrite
                 return;
             }
 
-            Steps = tree.Evaluate(variablesList, ReverseOrder);
-            OnPropertyChanged(nameof(Steps));
+            Steps1 = tree.Evaluate(variables, ReverseOrder);
+            OnPropertyChanged(nameof(Steps1));
+        }
+
+        private void EvaluateExpression2(IEnumerable<string> variables)
+        {
+            List<Token> tokens = null;
+            var stripped = InputText2.Replace(" ", String.Empty);
+            try
+            {
+                tokens = Token.Tokenize(stripped);
+            }
+            catch (IllegalCharacterException)
+            {
+                MessageBox.Show("Illegal character detected.\nValid characters include:\n\tAlphanumeric characters and parentheses\n\tUnderscores (\"_\")\n\tOperators: \"!\", \"~\", \"&\", \"|\"\n\nInput cannot end with an operator.");
+                return;
+            }
+            catch (ParenthesisMismatchExeption)
+            {
+                MessageBox.Show("Number of parentheses do not match.");
+                return;
+            }
+
+
+            AST tree;
+            try
+            {
+                tree = new AST(tokens);
+            }
+            catch (Exception)
+            {
+                MessageBox.Show("Could not parse expression.");
+                return;
+            }
+
+            Steps2 = tree.Evaluate(variables, ReverseOrder);
+            OnPropertyChanged(nameof(Steps2));
         }
 
         public ICommand EvaluateCommand
         {
             get
             {
-                return new RelayCommand(o=>Evaluate(),o=>!String.IsNullOrEmpty(InputText));
+                return new RelayCommand(o=>Evaluate()/*, o=>!String.IsNullOrEmpty(Variables)*/);
             }
         }
 

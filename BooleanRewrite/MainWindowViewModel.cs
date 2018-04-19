@@ -19,6 +19,7 @@ namespace BooleanRewrite
             Steps2 = new List<ConversionStep>();
         }
 
+        #region Properties
         string inputText;
         public string InputText
         {
@@ -56,7 +57,6 @@ namespace BooleanRewrite
                 OnPropertyChanged();
             }
         }
-
 
         private string variables;
         public string Variables
@@ -105,6 +105,10 @@ namespace BooleanRewrite
 
         public IList<ConversionStep> Steps1 { get; private set; }
         public IList<ConversionStep> Steps2 { get; private set; }
+
+        #endregion
+
+        #region Methods
 
         private string ReplaceLogicalSymbols(string input)
         {
@@ -242,19 +246,6 @@ namespace BooleanRewrite
             OnPropertyChanged(nameof(Steps2));
         }
 
-        public ICommand EvaluateCommand
-        {
-            get
-            {
-                return new RelayCommand(o=>Evaluate()/*, o=>!String.IsNullOrEmpty(Variables)*/);
-            }
-        }
-
-        public ICommand ExportCommand
-        {
-            get { return new RelayCommand(o => Export()); }
-        }
-
         public void Export()
         {
             var fileDialog = new System.Windows.Forms.SaveFileDialog()
@@ -294,16 +285,22 @@ namespace BooleanRewrite
 
             return stringBuilder.ToString();
         }
-    }
+        #endregion
 
-    public class ConversionStep
-    {
-        public ConversionStep(string exp, string justification)
+        #region Commands
+        public ICommand EvaluateCommand
         {
-            Expression = exp;
-            Justification = justification;
+            get
+            {
+                return new RelayCommand(o=>Evaluate()/*, o=>!String.IsNullOrEmpty(Variables)*/);
+            }
         }
-        public string Expression { get; }
-        public string Justification { get; }
+
+        public ICommand ExportCommand
+        {
+            get { return new RelayCommand(o => Export()); }
+        }
+        #endregion
+
     }
 }

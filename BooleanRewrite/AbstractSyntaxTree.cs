@@ -9,7 +9,6 @@ namespace BooleanRewrite
 {
     public class AST
     {
-
         public AST(List<Token> tokens)
         {
             var enumerator = tokens.GetEnumerator();
@@ -61,6 +60,36 @@ namespace BooleanRewrite
                     right.Parent = parent;
                     return parent;
                 }
+                else if (polishNotationTokensEnumerator.Current.value == "CONDITIONAL")
+                {
+                    polishNotationTokensEnumerator.MoveNext();
+                    BoolExpr right = Make(ref polishNotationTokensEnumerator);
+                    BoolExpr left = Make(ref polishNotationTokensEnumerator);
+                    var parent = BoolExpr.CreateConditional(left, right);
+                    left.Parent = parent;
+                    right.Parent = parent;
+                    return parent;
+                }
+                else if (polishNotationTokensEnumerator.Current.value == "BICONDITIONAL")
+                {
+                    polishNotationTokensEnumerator.MoveNext();
+                    BoolExpr right = Make(ref polishNotationTokensEnumerator);
+                    BoolExpr left = Make(ref polishNotationTokensEnumerator);
+                    var parent = BoolExpr.CreateBiconditional(left, right);
+                    left.Parent = parent;
+                    right.Parent = parent;
+                    return parent;
+                }
+                else if (polishNotationTokensEnumerator.Current.value == "XOR")
+                {
+                    polishNotationTokensEnumerator.MoveNext();
+                    BoolExpr right = Make(ref polishNotationTokensEnumerator);
+                    BoolExpr left = Make(ref polishNotationTokensEnumerator);
+                    var parent = BoolExpr.CreateXor(left, right);
+                    left.Parent = parent;
+                    right.Parent = parent;
+                    return parent;
+                }
             }
             return null;
         }
@@ -104,6 +133,30 @@ namespace BooleanRewrite
                 PrettyPrintHelper(stringBuilder, node.Right);
                 stringBuilder.Append(')');
             }
+            else if (node.Op == BoolExpr.BOP.CONDITIONAL)
+            {
+                stringBuilder.Append('(');
+                PrettyPrintHelper(stringBuilder, node.Left);
+                stringBuilder.Append(LogicalSymbols.Conditional);
+                PrettyPrintHelper(stringBuilder, node.Right);
+                stringBuilder.Append(')');
+            }
+            else if (node.Op == BoolExpr.BOP.BICONDITIONAL)
+            {
+                stringBuilder.Append('(');
+                PrettyPrintHelper(stringBuilder, node.Left);
+                stringBuilder.Append(LogicalSymbols.Biconditional);
+                PrettyPrintHelper(stringBuilder, node.Right);
+                stringBuilder.Append(')');
+            }
+            else if (node.Op == BoolExpr.BOP.XOR)
+            {
+                stringBuilder.Append('(');
+                PrettyPrintHelper(stringBuilder, node.Left);
+                stringBuilder.Append(LogicalSymbols.XOr);
+                PrettyPrintHelper(stringBuilder, node.Right);
+                stringBuilder.Append(')');
+            }
         }
 
         public IList<ConversionStep> Evaluate(IEnumerable<string> variables, bool reverse = false)
@@ -111,6 +164,10 @@ namespace BooleanRewrite
             BoolExpr root;
             var steps = new List<ConversionStep>();
             steps.Add(new ConversionStep(ToString(), "Input"));
+
+            root = Root;
+            ConvertOperators(ref root, steps);
+            Root = root;
 
             if(!IsNNF(Root))
             {
@@ -135,48 +192,42 @@ namespace BooleanRewrite
             return steps;
         }
 
-        private void RemoveIdentities(ref BoolExpr node, List<ConversionStep> steps)
+        void ConvertOperators(ref BoolExpr node, IList<ConversionStep> steps)
         {
             if (node == null || node.Op == BoolExpr.BOP.LEAF)
                 return;
 
-
-            var right = node.Right;
-            var left = node.Left;
-            RemoveIdentities(ref left, steps);
-            RemoveIdentities(ref right, steps);
-            node.Right = right;
-            node.Left = left;
-            
-            // try to apply Identity as many times as possible
-            while (Rewrite.Identity(ref node))
+            if(Rewrite.Implication(ref node))
             {
                 if (node.Parent == null)
                 {
                     Root = node;
                 }
-                steps.Add(new ConversionStep(ToString(), "Identity"));
+                steps.Add(new ConversionStep(ToString(), "Implication"));
             }
-        }
 
-        private void GenerateComplement(ref BoolExpr node, List<ConversionStep> steps)
-        {
-            if (node == null || node.Op == BoolExpr.BOP.LEAF)
-                return;
-
-            if (Rewrite.Complement(ref node))
+            if(Rewrite.Equivalence(ref node))
             {
                 if (node.Parent == null)
                 {
                     Root = node;
                 }
-                steps.Add(new ConversionStep(ToString(), "Complement"));
+                steps.Add(new ConversionStep(ToString(), "Equivalence"));
+            }
+
+            if (Rewrite.XOR(ref node))
+            {
+                if (node.Parent == null)
+                {
+                    Root = node;
+                }
+                steps.Add(new ConversionStep(ToString(), "Xor"));
             }
 
             var right = node.Right;
             var left = node.Left;
-            GenerateComplement(ref left, steps);
-            GenerateComplement(ref right, steps);
+            ConvertToNNF(ref left, steps);
+            ConvertToNNF(ref right, steps);
             node.Right = right;
             node.Left = left;
         }
@@ -273,68 +324,7 @@ namespace BooleanRewrite
     }
 
     static class Rewrite
-    {   
-        public static bool Identity(ref BoolExpr node)
-        {
-            if(node.Op == BoolExpr.BOP.OR)
-            {
-                if (node.Left.IsContradiction())
-                {
-                    var oldNode = node;
-                    node = node.Right;
-                    node.Parent = oldNode.Parent;
-                    UpdateParent(node, oldNode);
-                    return true;
-                }
-
-                if (node.Right.IsContradiction())
-                {
-                    var oldNode = node;
-                    node = node.Left;
-                    node.Parent = oldNode.Parent;
-                    UpdateParent(node, oldNode);
-                    return true;
-                }
-            }
-
-            return false;
-        }
-
-        public static bool Complement(ref BoolExpr node)
-        {
-            bool rewriteCondition = false;
-
-            if (node.Op == BoolExpr.BOP.AND)
-            {
-                if(node.Left.Op == BoolExpr.BOP.NOT)
-                {
-                    if(node.Left.Right.Lit == node.Right.Lit)
-                    {
-                        rewriteCondition = true;
-                    }
-                }
-                else if(node.Right.Op == BoolExpr.BOP.NOT)
-                {
-                    if (node.Right.Right.Lit == node.Left.Lit)
-                    {
-                        rewriteCondition = true;
-                    }
-                }
-            }
-
-            if (rewriteCondition)
-            {
-                var oldNode = node;
-                node = BoolExpr.CreateContradiction();
-                node.Parent = oldNode.Parent;
-                UpdateParent(node, oldNode);
-
-                return true;
-            }
-
-            return false;
-        }
-
+    {
         public static bool Distribution(ref BoolExpr node)
         {
             if (node.Op == BoolExpr.BOP.AND)
@@ -427,6 +417,82 @@ namespace BooleanRewrite
             return false;
         }
 
+        public static bool Implication(ref BoolExpr node)
+        {
+            if (node.Op == BoolExpr.BOP.CONDITIONAL)
+            {
+                var oldNode = node;
+                var left = BoolExpr.CreateNot(node.Left);
+                var right = node.Right;
+                node = BoolExpr.CreateOr(left, right);
+                node.Parent = oldNode.Parent;
+                left.Parent = node;
+                right.Parent = node;
+
+                UpdateParent(node, oldNode);
+                return true;
+            }
+            return false;
+        }
+
+        public static bool Equivalence(ref BoolExpr node)
+        {
+            if (node.Op == BoolExpr.BOP.BICONDITIONAL)
+            {
+                var oldNode = node;
+
+                var negatedLeft = BoolExpr.CreateNot(node.Left);
+                var negatedRight = BoolExpr.CreateNot(node.Right);
+
+                var left = BoolExpr.CreateAnd(negatedLeft, negatedRight);
+                negatedLeft.Parent = left;
+                negatedRight.Parent = left;
+
+                var right = BoolExpr.CreateAnd(node.Left, node.Right);
+                node.Left.Parent = right;
+                node.Right.Parent = right;
+
+                node = BoolExpr.CreateOr(left, right);
+
+                node.Parent = oldNode.Parent;
+                left.Parent = node;
+                right.Parent = node;
+
+                UpdateParent(node, oldNode);
+                return true;
+            }
+            return false;
+        }
+
+        public static bool XOR(ref BoolExpr node)
+        {
+            if (node.Op == BoolExpr.BOP.XOR)
+            {
+                var oldNode = node;
+
+                var negatedLeft = BoolExpr.CreateNot(node.Left);
+                var negatedRight = BoolExpr.CreateNot(node.Right);
+
+                var left = BoolExpr.CreateAnd(node.Left, negatedRight);
+                node.Left.Parent = left;
+                negatedRight.Parent = left;
+
+                var right = BoolExpr.CreateAnd(negatedLeft, node.Right);
+                negatedLeft.Parent = right;
+                node.Right.Parent = right;
+
+                node = BoolExpr.CreateOr(left, right);
+
+                node.Parent = oldNode.Parent;
+                left.Parent = node;
+                right.Parent = node;
+
+                UpdateParent(node, oldNode);
+                return true;
+            }
+            return false;
+        }
+
         private static void UpdateParent(BoolExpr node, BoolExpr oldNode)
         {
             if (node.Parent == null || oldNode.Parent == null)
@@ -440,52 +506,6 @@ namespace BooleanRewrite
             {
                 node.Parent.Right = node;
             }
-        }
-        
-        // unused test
-        public static bool ComplementIdentity(ref BoolExpr node)
-        {
-            bool result = false;
-            if (node.Op == BoolExpr.BOP.OR)
-            {
-                var left = node.Left;
-                var right = node.Right;
-                if (node.Left.IsContradiction2())
-                {
-                    var oldNode = node;
-                    if(node.Right.IsContradiction2())
-                    {
-                        node = BoolExpr.CreateContradiction();
-                    }
-                    else
-                    {
-                        node = node.Right;
-                    }
-                    node.Parent = oldNode.Parent;
-                    UpdateParent(node, oldNode);
-                    
-                    result = true;
-                }
-
-                else if (node.Right.IsContradiction2())
-                {
-                    var oldNode = node;
-                    if (node.Left.IsContradiction2())
-                    {
-                        node = BoolExpr.CreateContradiction();
-                    }
-                    else
-                    {
-                        node = node.Left;
-                    }
-                    node.Parent = oldNode.Parent;
-                    UpdateParent(node, oldNode);
-
-                    result = true;
-                }
-            }
-
-            return result;
         }
     }
 }

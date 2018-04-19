@@ -20,7 +20,6 @@ namespace BooleanRewrite
     /// </summary>
     public partial class MainWindow : Window
     {
-        bool needMoveCursor = false;
         public MainWindow()
         {
             InitializeComponent();
@@ -30,29 +29,32 @@ namespace BooleanRewrite
 
         private void CloseCommandHandler(object sender, ExecutedRoutedEventArgs e) => Close();
 
-        private void inputBox_TextChanged(object sender, TextChangedEventArgs e)
-        {
-            if(needMoveCursor)
-            {
-                inputBox.Focus();
-                inputBox.CaretIndex = inputBox.Text.Length;
-                needMoveCursor = false;
-            }
-        }
-
-        private void inputBox2_TextChanged(object sender, TextChangedEventArgs e)
-        {
-            if (needMoveCursor)
-            {
-                inputBox2.Focus();
-                inputBox2.CaretIndex = inputBox2.Text.Length;
-                needMoveCursor = false;
-            }
-        }
-
         private void Button_Click(object sender, RoutedEventArgs e)
         {
-            needMoveCursor = true;
+            if(!String.IsNullOrWhiteSpace(inputBox.SelectedText))
+            {
+                var temp = inputBox.SelectionStart;
+                inputBox.Text = inputBox.Text.Remove(inputBox.SelectionStart,inputBox.SelectionLength);
+                inputBox.CaretIndex = temp;
+            }
+            var index = inputBox.CaretIndex+1;
+            inputBox.Text = inputBox.Text.Insert(inputBox.CaretIndex, (string)(sender as Button).Content);
+            inputBox.Focus();
+            inputBox.CaretIndex = index;
+        }
+
+        private void Button_Click2(object sender, RoutedEventArgs e)
+        {
+            if (!String.IsNullOrWhiteSpace(inputBox2.SelectedText))
+            {
+                var temp = inputBox2.SelectionStart;
+                inputBox2.Text = inputBox2.Text.Remove(inputBox2.SelectionStart, inputBox2.SelectionLength);
+                inputBox2.CaretIndex = temp;
+            }
+            var index = inputBox2.CaretIndex + 1;
+            inputBox2.Text = inputBox2.Text.Insert(inputBox2.CaretIndex, (string)(sender as Button).Content);
+            inputBox2.Focus();
+            inputBox2.CaretIndex = index;
         }
     }
 }

@@ -13,7 +13,10 @@ namespace BooleanRewrite
             LEAF,
             AND,
             OR,
-            NOT
+            NOT,
+            CONDITIONAL,
+            BICONDITIONAL,
+            XOR
         };
 
         //
@@ -69,6 +72,21 @@ namespace BooleanRewrite
         public static BoolExpr CreateOr(BoolExpr left, BoolExpr right)
         {
             return new BoolExpr(BOP.OR, left, right);
+        }
+
+        public static BoolExpr CreateConditional(BoolExpr left, BoolExpr right)
+        {
+            return new BoolExpr(BOP.CONDITIONAL, left, right);
+        }
+
+        public static BoolExpr CreateBiconditional(BoolExpr left, BoolExpr right)
+        {
+            return new BoolExpr(BOP.BICONDITIONAL, left, right);
+        }
+
+        public static BoolExpr CreateXor(BoolExpr left, BoolExpr right)
+        {
+            return new BoolExpr(BOP.XOR, left, right);
         }
 
         public static BoolExpr CreateBoolVar(String str)

@@ -12,6 +12,7 @@
             <Setter Property="Height" Value="17.6"/>
             <Setter Property="Padding" Value="0"/>
             <Setter Property="Margin" Value="0 0 3 5"/>
+            <Setter Property="IsTabStop" Value="False"/>
         </Style>
     </Window.Resources>
     <Window.CommandBindings>
@@ -20,15 +21,15 @@
     </Window.CommandBindings>
         <DockPanel>
         <Menu DockPanel.Dock="Top">
-            <MenuItem Header="_File">
+            <MenuItem Header="_File" IsTabStop="False">
                 <MenuItem Header="Export..." Command="{Binding ExportCommand}"/>
                 <MenuItem Header="First T.T. Row False" IsCheckable="True" IsChecked="{Binding ReverseOrder}"/>
                 <MenuItem Command="ApplicationCommands.Close"/>
             </MenuItem>
-            <MenuItem Header="Edit">
+            <MenuItem Header="Edit" IsTabStop="False">
                 <MenuItem Command="Copy"/>
             </MenuItem>
-            <MenuItem Header="Help"/>
+            <MenuItem Header="Help" IsTabStop="False"/>
         </Menu>
         <TextBlock DockPanel.Dock="Bottom" Text="{Binding ResultText}" Padding="10 0 0 2" Background="{Binding ResultColor}"/>
         <Grid>
@@ -52,7 +53,16 @@
                         <ColumnDefinition Width="120"/>
                     </Grid.ColumnDefinitions>
                     <TextBlock Text="Variables: " Grid.Column="0"/>
-                    <TextBox x:Name="VariableTextBox" Text="{Binding Variables, Mode=OneWayToSource, UpdateSourceTrigger=LostFocus}" Grid.Column="2"/>
+                    <TextBox x:Name="VariableTextBox" 
+                             Text="{Binding Variables, Mode=OneWayToSource, UpdateSourceTrigger=PropertyChanged}" 
+                             Grid.Column="2"
+                             TabIndex="0">
+                        <TextBox.InputBindings>
+                            <KeyBinding Gesture="Enter"
+                                            Command="{Binding EvaluateCommand}"
+                                            CommandParameter="{Binding RelativeSource={RelativeSource FindAncestor,AncestorType={x:Type TextBox}}}"/>
+                        </TextBox.InputBindings>
+                    </TextBox>
                 </Grid>
                 
                 
@@ -65,17 +75,18 @@
 
                     <StackPanel Grid.Column="0">
                         <StackPanel Orientation="Horizontal">
-                            <Button Content="&#x00ac;" Style="{StaticResource LogicalSymbolButtonStyle}" ToolTip="! or ~" Command="{Binding AppendTextCommand}" CommandParameter="&#x00ac;" Click="Button_Click"/>
-                            <Button Content="&#x2227;" Style="{StaticResource LogicalSymbolButtonStyle}" ToolTip="&amp;" Command="{Binding AppendTextCommand}" CommandParameter="&#x2227;" Click="Button_Click"/>
-                            <Button Content="&#x2228;" Style="{StaticResource LogicalSymbolButtonStyle}" ToolTip="|" Command="{Binding AppendTextCommand}" CommandParameter="&#x2228;" Click="Button_Click"/>
-                            <Button Content="&#x2192;" Style="{StaticResource LogicalSymbolButtonStyle}" ToolTip="%" Command="{Binding AppendTextCommand}" CommandParameter="&#x2192;" Click="Button_Click"/>
-                            <Button Content="&#x2194;" Style="{StaticResource LogicalSymbolButtonStyle}" ToolTip="$" Command="{Binding AppendTextCommand}" CommandParameter="&#x2194;" Click="Button_Click"/>
-                            <Button Content="&#x22bb;" Style="{StaticResource LogicalSymbolButtonStyle}" ToolTip="#" Command="{Binding AppendTextCommand}" CommandParameter="&#x22bb;" Click="Button_Click"/>
+                            <Button Content="&#x00ac;" Style="{StaticResource LogicalSymbolButtonStyle}" ToolTip="! or ~" Click="Button_Click"/>
+                            <Button Content="&#x2227;" Style="{StaticResource LogicalSymbolButtonStyle}" ToolTip="&amp;" Click="Button_Click"/>
+                            <Button Content="&#x2228;" Style="{StaticResource LogicalSymbolButtonStyle}" ToolTip="|" Click="Button_Click"/>
+                            <Button Content="&#x2192;" Style="{StaticResource LogicalSymbolButtonStyle}" ToolTip="%" Click="Button_Click"/>
+                            <Button Content="&#x2194;" Style="{StaticResource LogicalSymbolButtonStyle}" ToolTip="$" Click="Button_Click"/>
+                            <Button Content="&#x22bb;" Style="{StaticResource LogicalSymbolButtonStyle}" ToolTip="#" Click="Button_Click"/>
                         </StackPanel>
                         <TextBox Text="{Binding InputText,UpdateSourceTrigger=PropertyChanged}"
                              HorizontalAlignment="Stretch"
                              MinWidth="200"
-                             x:Name="inputBox" TextChanged="inputBox_TextChanged">
+                             x:Name="inputBox"
+                             TabIndex="1">
                             <TextBox.InputBindings>
                                 <KeyBinding Gesture="Enter"
                                             Command="{Binding EvaluateCommand}"
@@ -92,21 +103,23 @@
                             VerticalAlignment="Center"
                             HorizontalAlignment="Center"
                             Padding="3 2"
-                            Margin="20 0"/>
+                            Margin="20 0"
+                            IsTabStop="False"/>
 
                     <StackPanel Grid.Column="2">
                         <StackPanel Orientation="Horizontal">
-                            <Button Content="&#x00ac;" Style="{StaticResource LogicalSymbolButtonStyle}" ToolTip="! or ~" Command="{Binding AppendTextCommand2}" CommandParameter="&#x00ac;" Click="Button_Click"/>
-                            <Button Content="&#x2227;" Style="{StaticResource LogicalSymbolButtonStyle}" ToolTip="&amp;" Command="{Binding AppendTextCommand2}" CommandParameter="&#x2227;" Click="Button_Click"/>
-                            <Button Content="&#x2228;" Style="{StaticResource LogicalSymbolButtonStyle}" ToolTip="|" Command="{Binding AppendTextCommand2}" CommandParameter="&#x2228;" Click="Button_Click"/>
-                            <Button Content="&#x2192;" Style="{StaticResource LogicalSymbolButtonStyle}" ToolTip="%" Command="{Binding AppendTextCommand2}" CommandParameter="&#x2192;" Click="Button_Click"/>
-                            <Button Content="&#x2194;" Style="{StaticResource LogicalSymbolButtonStyle}" ToolTip="$" Command="{Binding AppendTextCommand2}" CommandParameter="&#x2194;" Click="Button_Click"/>
-                            <Button Content="&#x22bb;" Style="{StaticResource LogicalSymbolButtonStyle}" ToolTip="#" Command="{Binding AppendTextCommand2}" CommandParameter="&#x22bb;" Click="Button_Click"/>
+                            <Button Content="&#x00ac;" Style="{StaticResource LogicalSymbolButtonStyle}" ToolTip="! or ~" Click="Button_Click2"/>
+                            <Button Content="&#x2227;" Style="{StaticResource LogicalSymbolButtonStyle}" ToolTip="&amp;" Click="Button_Click2"/>
+                            <Button Content="&#x2228;" Style="{StaticResource LogicalSymbolButtonStyle}" ToolTip="|" Click="Button_Click2"/>
+                            <Button Content="&#x2192;" Style="{StaticResource LogicalSymbolButtonStyle}" ToolTip="%" Click="Button_Click2"/>
+                            <Button Content="&#x2194;" Style="{StaticResource LogicalSymbolButtonStyle}" ToolTip="$" Click="Button_Click2"/>
+                            <Button Content="&#x22bb;" Style="{StaticResource LogicalSymbolButtonStyle}" ToolTip="#" Click="Button_Click2"/>
                         </StackPanel>
                         <TextBox Text="{Binding InputText2,UpdateSourceTrigger=PropertyChanged}"
                              HorizontalAlignment="Stretch"
                              MinWidth="200"
-                             x:Name="inputBox2" TextChanged="inputBox2_TextChanged">
+                             x:Name="inputBox2"
+                             TabIndex="2">
                             <TextBox.InputBindings>
                                 <KeyBinding Gesture="Enter"
                                             Command="{Binding EvaluateCommand}"

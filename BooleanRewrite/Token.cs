@@ -27,6 +27,15 @@ namespace BooleanRewrite
             },
             {
                 LogicalSymbols.Or, new KeyValuePair<TokenType, string>(TokenType.BINARY_OP, "OR")
+            },
+            {
+                LogicalSymbols.Conditional, new KeyValuePair<TokenType, string>(TokenType.BINARY_OP, "CONDITIONAL")
+            },
+            {
+                LogicalSymbols.Biconditional, new KeyValuePair<TokenType, string>(TokenType.BINARY_OP, "BICONDITIONAL")
+            },
+            {
+                LogicalSymbols.XOr, new KeyValuePair<TokenType, string>(TokenType.BINARY_OP, "XOR")
             }
         };
 

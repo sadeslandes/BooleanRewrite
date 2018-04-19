@@ -31,17 +31,13 @@ namespace BooleanRewrite
                 }
                 else
                 {
-                    value = value.Replace('&', LogicalSymbols.And);
-                    value = value.Replace('|', LogicalSymbols.Or);
-                    value = value.Replace('!', LogicalSymbols.Not);
-                    value = value.Replace('~', LogicalSymbols.Not);
-                    inputText = value;
+                    inputText = ReplaceLogicalSymbols(value);
                 }
                 ResetResults();
                 OnPropertyChanged();
             }
         }
-
+        
         string inputText2;
         public string InputText2
         {
@@ -54,11 +50,7 @@ namespace BooleanRewrite
                 }
                 else
                 {
-                    value = value.Replace('&', LogicalSymbols.And);
-                    value = value.Replace('|', LogicalSymbols.Or);
-                    value = value.Replace('!', LogicalSymbols.Not);
-                    value = value.Replace('~', LogicalSymbols.Not);
-                    inputText2 = value;
+                    inputText2 = ReplaceLogicalSymbols(value);
                 }
                 ResetResults();
                 OnPropertyChanged();
@@ -114,6 +106,18 @@ namespace BooleanRewrite
         public IList<ConversionStep> Steps1 { get; private set; }
         public IList<ConversionStep> Steps2 { get; private set; }
 
+        private string ReplaceLogicalSymbols(string input)
+        {
+            input = input.Replace('&', LogicalSymbols.And);
+            input = input.Replace('|', LogicalSymbols.Or);
+            input = input.Replace('!', LogicalSymbols.Not);
+            input = input.Replace('~', LogicalSymbols.Not);
+            input = input.Replace('$', LogicalSymbols.Conditional);
+            input = input.Replace('%', LogicalSymbols.Biconditional);
+            input = input.Replace('#', LogicalSymbols.XOr);
+            return input;
+        }
+
         private void Evaluate()
         {
             IEnumerable<string> variablesList = Variables.Split(',').Where(s => !String.IsNullOrEmpty(s));
@@ -142,12 +146,12 @@ namespace BooleanRewrite
                 if (Steps1.Last().Expression == Steps2.Last().Expression)
                 {
                     ResultText = "Equivalent!";
-                    ResultColor = Brushes.Green;
+                    ResultColor = Brushes.LightGreen;
                 }
                 else
                 {
                     ResultText = "Not equivalent";
-                    ResultColor = Brushes.Red;
+                    ResultColor = Brushes.LightCoral;
                 }
             }
         }
@@ -246,22 +250,6 @@ namespace BooleanRewrite
             }
         }
 
-        public ICommand AppendTextCommand
-        {
-            get
-            {
-                return new RelayCommand(o=>AppendText(o as string, nameof(InputText)));
-            }
-        }
-
-        public ICommand AppendTextCommand2
-        {
-            get
-            {
-                return new RelayCommand(o => AppendText(o as string, nameof(InputText2)));
-            }
-        }
-
         public ICommand ExportCommand
         {
             get { return new RelayCommand(o => Export()); }
@@ -305,14 +293,6 @@ namespace BooleanRewrite
             }
 
             return stringBuilder.ToString();
-        }
-
-        private void AppendText(string text, string propName)
-        {
-            if (propName == nameof(InputText))
-                InputText += text;
-            else
-                InputText2 += text;
         }
     }
 

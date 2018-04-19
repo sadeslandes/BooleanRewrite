@@ -13,6 +13,12 @@ namespace BooleanRewrite
 {
     class MainWindowViewModel : ViewModelBase
     {
+        public MainWindowViewModel()
+        {
+            Steps1 = new List<ConversionStep>();
+            Steps2 = new List<ConversionStep>();
+        }
+
         string inputText;
         public string InputText
         {
@@ -254,6 +260,51 @@ namespace BooleanRewrite
             {
                 return new RelayCommand(o => AppendText(o as string, nameof(InputText2)));
             }
+        }
+
+        public ICommand ExportCommand
+        {
+            get { return new RelayCommand(o => Export()); }
+        }
+
+        public void Export()
+        {
+            var fileDialog = new System.Windows.Forms.SaveFileDialog()
+            {
+                InitialDirectory = Environment.SpecialFolder.MyDocuments.ToString(),
+                Filter = "csv files (*.csv)|*.csv|All files (*.*)|*.*",
+            };
+
+            if (fileDialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+            {
+                // do work to save file
+                if (!String.IsNullOrEmpty(fileDialog.FileName))
+                {
+                    System.IO.File.WriteAllText(fileDialog.FileName, WriteCSV());
+                }
+            }
+        }
+
+        private string WriteCSV()
+        {
+            var stringBuilder = new StringBuilder();
+
+            var enum_steps1 = Steps1.GetEnumerator();
+            var enum_steps2 = Steps2.GetEnumerator();
+
+            bool hasElements1 = true;
+            bool hasElements2 = true;
+            while(hasElements1 || hasElements2)
+            {
+                hasElements1 = enum_steps1.MoveNext();
+                hasElements2 = enum_steps2.MoveNext();
+                stringBuilder.Append($"{(hasElements1 ? enum_steps1.Current.Expression : " ")}," +
+                    $"{(hasElements1 ? enum_steps1.Current.Justification : " ")}," +
+                    $"{(hasElements2 ? enum_steps2.Current.Expression : " ")}," +
+                    $"{(hasElements2 ? enum_steps2.Current.Justification : " ")}\n");
+            }
+
+            return stringBuilder.ToString();
         }
 
         private void AppendText(string text, string propName)

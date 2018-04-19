@@ -18,23 +18,45 @@ namespace BooleanRewrite
             get { return inputText; }
             set
             {
-                if(String.IsNullOrEmpty(value))
+                if (String.IsNullOrEmpty(value))
                 {
                     inputText = "";
                 }
                 else
                 {
-                    value = value.Replace('&',LogicalSymbols.And);
-                    value = value.Replace('|',LogicalSymbols.Or);
-                    value = value.Replace('!',LogicalSymbols.Not);
-                    value = value.Replace('~',LogicalSymbols.Not);
+                    value = value.Replace('&', LogicalSymbols.And);
+                    value = value.Replace('|', LogicalSymbols.Or);
+                    value = value.Replace('!', LogicalSymbols.Not);
+                    value = value.Replace('~', LogicalSymbols.Not);
                     inputText = value;
                 }
                 OnPropertyChanged();
             }
         }
 
-        
+        string inputText2;
+        public string InputText2
+        {
+            get { return inputText2; }
+            set
+            {
+                if (String.IsNullOrEmpty(value))
+                {
+                    inputText2 = "";
+                }
+                else
+                {
+                    value = value.Replace('&', LogicalSymbols.And);
+                    value = value.Replace('|', LogicalSymbols.Or);
+                    value = value.Replace('!', LogicalSymbols.Not);
+                    value = value.Replace('~', LogicalSymbols.Not);
+                    inputText2 = value;
+                }
+                OnPropertyChanged();
+            }
+        }
+
+
         private string variables;
         public string Variables
         {
@@ -111,13 +133,24 @@ namespace BooleanRewrite
         {
             get
             {
-                return new RelayCommand(o=>AppendText(o as string));
+                return new RelayCommand(o=>AppendText(o as string, nameof(InputText)));
             }
         }
 
-        private void AppendText(string text)
+        public ICommand AppendTextCommand2
         {
-            InputText += text;
+            get
+            {
+                return new RelayCommand(o => AppendText(o as string, nameof(InputText2)));
+            }
+        }
+
+        private void AppendText(string text, string propName)
+        {
+            if (propName == nameof(InputText))
+                InputText += text;
+            else
+                InputText2 += text;
         }
     }
 

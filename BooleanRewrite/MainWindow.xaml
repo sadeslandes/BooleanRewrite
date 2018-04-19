@@ -35,10 +35,15 @@
                 <RowDefinition Height=".3*"/>
                 <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
 
             <StackPanel HorizontalAlignment="Center" 
                   VerticalAlignment="Center"
-                  Grid.Row="0">
+                  Grid.Row="0"
+                  Grid.ColumnSpan="2">
                 <Grid Margin=" 0 10 10 15">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="50"/>
@@ -46,40 +51,68 @@
                         <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
                     <TextBlock Text="Variables: " Grid.Column="0"/>
-                    <TextBox Text="{Binding Variables, Mode=OneWayToSource, UpdateSourceTrigger=LostFocus}" Grid.Column="2"/>
+                    <TextBox x:Name="VariableTextBox" Text="{Binding Variables, Mode=OneWayToSource, UpdateSourceTrigger=LostFocus}" Grid.Column="2"/>
                 </Grid>
                 
-                <StackPanel Orientation="Horizontal">
-                    <Button Content="&#x00ac;" Style="{StaticResource LogicalSymbolButtonStyle}" ToolTip="! or ~" Command="{Binding AppendTextCommand}" CommandParameter="&#x00ac;" Click="Button_Click"/>
-                    <Button Content="&#x2227;" Style="{StaticResource LogicalSymbolButtonStyle}" ToolTip="&amp;" Command="{Binding AppendTextCommand}" CommandParameter="&#x2227;" Click="Button_Click"/>
-                    <Button Content="&#x2228;" Style="{StaticResource LogicalSymbolButtonStyle}" ToolTip="|" Command="{Binding AppendTextCommand}" CommandParameter="&#x2228;" Click="Button_Click"/>
-                    <Button Content="&#x2192;" Style="{StaticResource LogicalSymbolButtonStyle}" ToolTip="%" Command="{Binding AppendTextCommand}" CommandParameter="&#x2192;" Click="Button_Click"/>
-                    <Button Content="&#x2194;" Style="{StaticResource LogicalSymbolButtonStyle}" ToolTip="$" Command="{Binding AppendTextCommand}" CommandParameter="&#x2194;" Click="Button_Click"/>
-                    <Button Content="&#x22bb;" Style="{StaticResource LogicalSymbolButtonStyle}" ToolTip="#" Command="{Binding AppendTextCommand}" CommandParameter="&#x22bb;" Click="Button_Click"/>
-                </StackPanel>
+                
                 <Grid>
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="2*"/>
-                        <ColumnDefinition/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
                         <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
-                    <TextBox Grid.Column="0" 
-                             Text="{Binding InputText,UpdateSourceTrigger=PropertyChanged}"
+
+                    <StackPanel Grid.Column="0">
+                        <StackPanel Orientation="Horizontal">
+                            <Button Content="&#x00ac;" Style="{StaticResource LogicalSymbolButtonStyle}" ToolTip="! or ~" Command="{Binding AppendTextCommand}" CommandParameter="&#x00ac;" Click="Button_Click"/>
+                            <Button Content="&#x2227;" Style="{StaticResource LogicalSymbolButtonStyle}" ToolTip="&amp;" Command="{Binding AppendTextCommand}" CommandParameter="&#x2227;" Click="Button_Click"/>
+                            <Button Content="&#x2228;" Style="{StaticResource LogicalSymbolButtonStyle}" ToolTip="|" Command="{Binding AppendTextCommand}" CommandParameter="&#x2228;" Click="Button_Click"/>
+                            <Button Content="&#x2192;" Style="{StaticResource LogicalSymbolButtonStyle}" ToolTip="%" Command="{Binding AppendTextCommand}" CommandParameter="&#x2192;" Click="Button_Click"/>
+                            <Button Content="&#x2194;" Style="{StaticResource LogicalSymbolButtonStyle}" ToolTip="$" Command="{Binding AppendTextCommand}" CommandParameter="&#x2194;" Click="Button_Click"/>
+                            <Button Content="&#x22bb;" Style="{StaticResource LogicalSymbolButtonStyle}" ToolTip="#" Command="{Binding AppendTextCommand}" CommandParameter="&#x22bb;" Click="Button_Click"/>
+                        </StackPanel>
+                        <TextBox Text="{Binding InputText,UpdateSourceTrigger=PropertyChanged}"
                              HorizontalAlignment="Stretch"
                              MinWidth="200"
                              x:Name="inputBox" TextChanged="inputBox_TextChanged">
-                        <TextBox.InputBindings>
-                            <KeyBinding Gesture="Enter"
-                                        Command="{Binding EvaluateCommand}"
-                                        CommandParameter="{Binding RelativeSource={RelativeSource FindAncestor,AncestorType={x:Type TextBox}}}"/>
-                        </TextBox.InputBindings>
-                    </TextBox>
-                    <Separator Grid.Column="1" Width="10" Visibility="Hidden"/>
-                    <Button Grid.Column="2" 
+                            <TextBox.InputBindings>
+                                <KeyBinding Gesture="Enter"
+                                            Command="{Binding EvaluateCommand}"
+                                            CommandParameter="{Binding RelativeSource={RelativeSource FindAncestor,AncestorType={x:Type TextBox}}}"/>
+                            </TextBox.InputBindings>
+                        </TextBox>
+                    </StackPanel>
+                    
+                    <Button Grid.Column="1" 
                             x:Name="test"
                             Content="Evaluate" 
                             Command="{Binding EvaluateCommand}"
-                            CommandParameter="{Binding ElementName=test}"/>
+                            CommandParameter="{Binding ElementName=test}"
+                            VerticalAlignment="Center"
+                            HorizontalAlignment="Center"
+                            Margin="20 0"/>
+
+                    <StackPanel Grid.Column="2">
+                        <StackPanel Orientation="Horizontal">
+                            <Button Content="&#x00ac;" Style="{StaticResource LogicalSymbolButtonStyle}" ToolTip="! or ~" Command="{Binding AppendTextCommand2}" CommandParameter="&#x00ac;" Click="Button_Click"/>
+                            <Button Content="&#x2227;" Style="{StaticResource LogicalSymbolButtonStyle}" ToolTip="&amp;" Command="{Binding AppendTextCommand2}" CommandParameter="&#x2227;" Click="Button_Click"/>
+                            <Button Content="&#x2228;" Style="{StaticResource LogicalSymbolButtonStyle}" ToolTip="|" Command="{Binding AppendTextCommand2}" CommandParameter="&#x2228;" Click="Button_Click"/>
+                            <Button Content="&#x2192;" Style="{StaticResource LogicalSymbolButtonStyle}" ToolTip="%" Command="{Binding AppendTextCommand2}" CommandParameter="&#x2192;" Click="Button_Click"/>
+                            <Button Content="&#x2194;" Style="{StaticResource LogicalSymbolButtonStyle}" ToolTip="$" Command="{Binding AppendTextCommand2}" CommandParameter="&#x2194;" Click="Button_Click"/>
+                            <Button Content="&#x22bb;" Style="{StaticResource LogicalSymbolButtonStyle}" ToolTip="#" Command="{Binding AppendTextCommand2}" CommandParameter="&#x22bb;" Click="Button_Click"/>
+                        </StackPanel>
+                        <TextBox Text="{Binding InputText2,UpdateSourceTrigger=PropertyChanged}"
+                             HorizontalAlignment="Stretch"
+                             MinWidth="200"
+                             x:Name="inputBox2" TextChanged="inputBox2_TextChanged">
+                            <TextBox.InputBindings>
+                                <KeyBinding Gesture="Enter"
+                                            Command="{Binding EvaluateCommand}"
+                                            CommandParameter="{Binding RelativeSource={RelativeSource FindAncestor,AncestorType={x:Type TextBox}}}"/>
+                            </TextBox.InputBindings>
+                        </TextBox>
+                    </StackPanel>
+                    
                 </Grid>
                 
             </StackPanel>
@@ -87,7 +120,7 @@
             <DataGrid x:Name="dataGrid"
                       Grid.Row="1"  
                       ItemsSource="{Binding Steps}" 
-                      Margin="20"
+                      Margin="20 20 10 20"
                       IsReadOnly="True"
                       CanUserResizeRows="False"
                       CanUserAddRows="False"
@@ -121,7 +154,45 @@
                     
                 </DataGrid.Columns>
             </DataGrid>
-            
+
+            <DataGrid x:Name="dataGrid2"
+                      Grid.Row="1"  
+                      Grid.Column="1"  
+                      ItemsSource="{Binding Steps}" 
+                      Margin="10 20 20 20"
+                      IsReadOnly="True"
+                      CanUserResizeRows="False"
+                      CanUserAddRows="False"
+                      CanUserDeleteRows="False"
+                      AutoGenerateColumns="False"
+                      HeadersVisibility="Column"
+                      SelectionMode="Extended"
+                      ClipboardCopyMode="ExcludeHeader"
+                      SelectionUnit="Cell">
+                <DataGrid.Columns>
+                    <DataGridTemplateColumn Header="Expression" 
+                                            Width="*" IsReadOnly="True"
+                                            ClipboardContentBinding="{Binding Expression}">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding Expression}" Padding="3 0"/>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+                    <DataGridTemplateColumn Header="Justification" 
+                                            Width="SizeToCells" 
+                                            MinWidth="75" 
+                                            IsReadOnly="True"
+                                            ClipboardContentBinding="{Binding Justification}">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding Justification}" Padding="3 0"/>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+
+                </DataGrid.Columns>
+            </DataGrid>
         </Grid>
     </DockPanel>
 </Window>

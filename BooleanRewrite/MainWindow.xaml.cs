@@ -25,7 +25,7 @@ namespace BooleanRewrite
         {
             InitializeComponent();
             DataContext = new MainWindowViewModel();
-            inputBox.Focus();
+            VariableTextBox.Focus();
         }
 
         private void CloseCommandHandler(object sender, ExecutedRoutedEventArgs e) => Close();
@@ -36,6 +36,16 @@ namespace BooleanRewrite
             {
                 inputBox.Focus();
                 inputBox.CaretIndex = inputBox.Text.Length;
+                needMoveCursor = false;
+            }
+        }
+
+        private void inputBox2_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            if (needMoveCursor)
+            {
+                inputBox2.Focus();
+                inputBox2.CaretIndex = inputBox2.Text.Length;
                 needMoveCursor = false;
             }
         }

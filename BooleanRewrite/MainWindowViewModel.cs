@@ -158,7 +158,7 @@ namespace BooleanRewrite
             var stripped = InputText.Replace(" ", String.Empty);
             try
             {
-                tokens = Token.Tokenize(stripped);
+                tokens = Token.Tokenize(stripped, variables);
             }
             catch (IllegalCharacterException)
             {
@@ -168,6 +168,11 @@ namespace BooleanRewrite
             catch (ParenthesisMismatchExeption)
             {
                 MessageBox.Show("Number of parentheses do not match.");
+                return;
+            }
+            catch (IllegalVariableException e)
+            {
+                MessageBox.Show(e.Message);
                 return;
             }
 
@@ -193,7 +198,7 @@ namespace BooleanRewrite
             var stripped = InputText2.Replace(" ", String.Empty);
             try
             {
-                tokens = Token.Tokenize(stripped);
+                tokens = Token.Tokenize(stripped,variables);
             }
             catch (IllegalCharacterException)
             {
@@ -203,6 +208,11 @@ namespace BooleanRewrite
             catch (ParenthesisMismatchExeption)
             {
                 MessageBox.Show("Number of parentheses do not match.");
+                return;
+            }
+            catch (IllegalVariableException e)
+            {
+                MessageBox.Show(e.Message);
                 return;
             }
 

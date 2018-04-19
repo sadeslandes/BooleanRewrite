@@ -73,7 +73,7 @@ namespace BooleanRewrite
             }
         }
 
-        public static List<Token> Tokenize(string text)
+        public static List<Token> Tokenize(string text, IEnumerable<string> variables)
         {
             ValidateInput(text);
 
@@ -85,6 +85,13 @@ namespace BooleanRewrite
             do
             {
                 t = new Token(reader);
+                if(t.type == TokenType.LITERAL)
+                {
+                    if(!variables.Contains(t.value))
+                    {
+                        throw new IllegalVariableException($"Unexpected variable \"{t.value}\" found.");
+                    }
+                }
                 tokens.Add(t);
             } while (t.type != Token.TokenType.EXPR_END);
 
@@ -160,6 +167,26 @@ namespace BooleanRewrite
     }
 
     [Serializable]
+    internal class IllegalVariableException : Exception
+    {
+        public IllegalVariableException()
+        {
+        }
+
+        public IllegalVariableException(string message) : base(message)
+        {
+        }
+
+        public IllegalVariableException(string message, Exception innerException) : base(message, innerException)
+        {
+        }
+
+        protected IllegalVariableException(SerializationInfo info, StreamingContext context) : base(info, context)
+        {
+        }
+    }
+
+    [Serializable]
     internal class ParenthesisMismatchExeption : Exception
     {
         public ParenthesisMismatchExeption()
@@ -198,4 +225,6 @@ namespace BooleanRewrite
         {
         }
     }
+
+
 }

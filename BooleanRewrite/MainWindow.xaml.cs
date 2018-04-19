@@ -56,5 +56,19 @@ namespace BooleanRewrite
             inputBox2.Focus();
             inputBox2.CaretIndex = index;
         }
+
+        private void MenuItem_Click(object sender, RoutedEventArgs e)
+        {
+            MessageBox.Show("1) Enter variable names into \"Variables\" text box, seperated by commas.\n" +
+                            "2) Enter expressions into one of both of the text boxes below.\n" +
+                            "3) Press <Enter> or click the \"Evaluate\" button\n\n" +
+                            "Operator Keyboard Shortcuts:\n" +
+                            "#: XOR\n" +
+                            "$: Conditional\n" +
+                            "%: Biconditional\n" +
+                            "&: And\n" +
+                            "|: Or\n" +
+                            "! or ~: Negation", "Help", MessageBoxButton.OK, MessageBoxImage.Information);
+        }
     }
 }

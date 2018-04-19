@@ -29,7 +29,7 @@
             <MenuItem Header="Edit" IsTabStop="False">
                 <MenuItem Command="Copy"/>
             </MenuItem>
-            <MenuItem Header="Help" IsTabStop="False"/>
+            <MenuItem Header="Help" IsTabStop="False" Click="MenuItem_Click"/>
         </Menu>
         <TextBlock DockPanel.Dock="Bottom" Text="{Binding ResultText}" Padding="10 0 0 2" Background="{Binding ResultColor}"/>
         <Grid>

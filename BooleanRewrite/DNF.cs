@@ -120,8 +120,11 @@ namespace BooleanRewrite
                             group.RemoveAll(x => x.Name == variable);
                             group.Add(new DNFLiteral() { Name = LogicalSymbols.Contradiction.ToString() });
                             steps.Add(new ConversionStep(ToString(), "Complement"));
-                            group.RemoveAll(x => x.Name != LogicalSymbols.Contradiction.ToString());
-                            steps.Add(new ConversionStep(ToString(), "Annihilation"));
+                            if(group.Count > 1)
+                            {
+                                group.RemoveAll(x => x.Name != LogicalSymbols.Contradiction.ToString());
+                                steps.Add(new ConversionStep(ToString(), "Annihilation"));
+                            }
                             expressionList.Remove(expressionList[i]);
                             steps.Add(new ConversionStep(ToString(), "Identity"));
                             incrementCounter = false;

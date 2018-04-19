@@ -165,9 +165,13 @@ namespace BooleanRewrite
             var steps = new List<ConversionStep>();
             steps.Add(new ConversionStep(ToString(), "Input"));
 
-            root = Root;
-            ConvertOperators(ref root, steps);
-            Root = root;
+            if(!BasicOperators(Root))
+            {
+                root = Root;
+                ConvertOperators(ref root, steps);
+                Root = root;
+            }
+            Debug.Assert(BasicOperators(Root));
 
             if(!IsNNF(Root))
             {
@@ -226,8 +230,8 @@ namespace BooleanRewrite
 
             var right = node.Right;
             var left = node.Left;
-            ConvertToNNF(ref left, steps);
-            ConvertToNNF(ref right, steps);
+            ConvertOperators(ref left, steps);
+            ConvertOperators(ref right, steps);
             node.Right = right;
             node.Left = left;
         }
@@ -287,6 +291,23 @@ namespace BooleanRewrite
             ConvertNNFtoDNF(ref right, steps);
             node.Right = right;
             node.Left = left;
+        }
+
+        bool BasicOperators(BoolExpr node)
+        {
+            switch (node.Op)
+            {
+                case BoolExpr.BOP.LEAF:
+                    return true;
+                case BoolExpr.BOP.AND:
+                    return BasicOperators(node.Right) && BasicOperators(node.Left);
+                case BoolExpr.BOP.OR:
+                    return BasicOperators(node.Right) && BasicOperators(node.Left);
+                case BoolExpr.BOP.NOT:
+                    return BasicOperators(node.Right);
+                default:
+                    return false;
+            }
         }
 
         bool IsDNF(BoolExpr node)

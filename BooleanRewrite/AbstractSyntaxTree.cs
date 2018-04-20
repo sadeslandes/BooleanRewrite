@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Diagnostics;
+using System.Collections.ObjectModel;
 
 namespace BooleanRewrite
 {
@@ -162,7 +163,7 @@ namespace BooleanRewrite
         public IList<ConversionStep> Evaluate(IEnumerable<string> variables, bool reverse = false)
         {
             BoolExpr root;
-            var steps = new List<ConversionStep>();
+            var steps = new ObservableCollection<ConversionStep>();
             steps.Add(new ConversionStep(ToString(), "Input"));
 
             if(!BasicOperators(Root))
@@ -462,16 +463,20 @@ namespace BooleanRewrite
             {
                 var oldNode = node;
 
-                var negatedLeft = BoolExpr.CreateNot(node.Left);
-                var negatedRight = BoolExpr.CreateNot(node.Right);
+                var copyLeft = new BoolExpr(node.Left);
+                var copyRight = new BoolExpr(node.Right);
+                var negatedLeft = BoolExpr.CreateNot(copyLeft);
+                var negatedRight = BoolExpr.CreateNot(copyRight);
+                copyLeft.Parent = negatedLeft;
+                copyRight.Parent = negatedRight;
 
-                var left = BoolExpr.CreateAnd(negatedLeft, negatedRight);
-                negatedLeft.Parent = left;
-                negatedRight.Parent = left;
+                var left = BoolExpr.CreateAnd(node.Left, node.Right);
+                node.Left.Parent = left;
+                node.Right.Parent = left;
 
-                var right = BoolExpr.CreateAnd(node.Left, node.Right);
-                node.Left.Parent = right;
-                node.Right.Parent = right;
+                var right = BoolExpr.CreateAnd(negatedLeft, negatedRight);
+                negatedLeft.Parent = right;
+                negatedRight.Parent = right;
 
                 node = BoolExpr.CreateOr(left, right);
 
@@ -491,8 +496,12 @@ namespace BooleanRewrite
             {
                 var oldNode = node;
 
-                var negatedLeft = BoolExpr.CreateNot(node.Left);
-                var negatedRight = BoolExpr.CreateNot(node.Right);
+                var copyLeft = new BoolExpr(node.Left);
+                var copyRight = new BoolExpr(node.Right);
+                var negatedLeft = BoolExpr.CreateNot(copyLeft);
+                var negatedRight = BoolExpr.CreateNot(copyRight);
+                copyLeft.Parent = negatedLeft;
+                copyRight.Parent = negatedRight;
 
                 var left = BoolExpr.CreateAnd(node.Left, negatedRight);
                 node.Left.Parent = left;

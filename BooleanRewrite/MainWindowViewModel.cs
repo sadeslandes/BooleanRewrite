@@ -15,8 +15,8 @@ namespace BooleanRewrite
     {
         public MainWindowViewModel()
         {
-            Steps1 = new List<ConversionStep>();
-            Steps2 = new List<ConversionStep>();
+            Steps1 = new ObservableCollection<ConversionStep>();
+            Steps2 = new ObservableCollection<ConversionStep>();
         }
 
         #region Properties
@@ -130,6 +130,11 @@ namespace BooleanRewrite
                 MessageBox.Show("No variable names given.\n\nType all desired variable names (seperated by commas) into the variables textbox.","Error");
                 return;
             }
+
+            Steps1.Clear();
+            Steps2.Clear();
+            OnPropertyChanged(nameof(Steps1));
+            OnPropertyChanged(nameof(Steps2));
 
             if(!String.IsNullOrWhiteSpace(InputText))
             {

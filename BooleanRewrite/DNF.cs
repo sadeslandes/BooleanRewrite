@@ -82,22 +82,22 @@ namespace BooleanRewrite
             for(int i=0;i<expressionList.Count;)
             {
                 bool incrementCounter = true;
-                foreach(var variable in variables)
+                bool removedGroup = false;
+                foreach (var variable in variables)
                 {
                     var group = expressionList[i];
                     int varCount = group.Count(x => x.Name == variable);
-                    var originalGroup = new DNFConjunctionGroup(group);
                     if (varCount > 1)
                     {
                         bool removed = false;
 
                         // remove duplicates
-                        while(group.Count(x => x.Name == variable && !x.isNegated) > 1)
+                        while (group.Count(x => x.Name == variable && !x.isNegated) > 1)
                         {
                             group.Remove(group.First(x => x.Name == variable && !x.isNegated));
                             removed = true;
                         }
-                        if(removed)
+                        if (removed)
                         {
                             steps.Add(new ConversionStep(ToString(), "Idempotence"));
                             removed = false;
@@ -120,20 +120,28 @@ namespace BooleanRewrite
                             group.RemoveAll(x => x.Name == variable);
                             group.Add(new DNFLiteral() { Name = LogicalSymbols.Contradiction.ToString() });
                             steps.Add(new ConversionStep(ToString(), "Complement"));
-                            if(group.Count > 1)
+                            if (group.Count > 1)
                             {
                                 group.RemoveAll(x => x.Name != LogicalSymbols.Contradiction.ToString());
                                 steps.Add(new ConversionStep(ToString(), "Annihilation"));
                             }
                             expressionList.Remove(expressionList[i]);
                             steps.Add(new ConversionStep(ToString(), "Identity"));
-                            incrementCounter = false;
+                            removedGroup = true;
                             break;
                         }
-
-
                     }
-                    if(varCount < 1)
+                }
+
+                if (removedGroup)
+                    continue;
+
+                foreach (var variable in variables)
+                {
+                    var group = expressionList[i];
+                    int varCount = group.Count(x => x.Name == variable);
+                    var originalGroup = new DNFConjunctionGroup(group);
+                    if (varCount < 1)
                     {
                         // Need to add variable
 
@@ -161,6 +169,7 @@ namespace BooleanRewrite
                     // order group
                     expressionList[i].Sort();
                 }
+
                 if (incrementCounter)
                 {
                     i++;

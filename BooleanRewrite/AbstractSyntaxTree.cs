@@ -271,7 +271,15 @@ namespace BooleanRewrite
             node.Left = left;
         }
 
-        void ConvertNNFtoDNF(ref BoolExpr node, IList<ConversionStep> steps)
+        void ConvertNNFtoDNF(ref BoolExpr root, IList<ConversionStep> steps)
+        {
+            while(!IsDNF(Root))
+            {
+                ApplyDistribution(ref root, steps);
+            }
+        }
+
+        void ApplyDistribution(ref BoolExpr node, IList<ConversionStep> steps)
         {
             if (node == null || node.Op == BoolExpr.BOP.LEAF)
                 return;
@@ -285,13 +293,22 @@ namespace BooleanRewrite
                 }
                 steps.Add(new ConversionStep(ToString(), "Distribution"));
             }
-
             var right = node.Right;
             var left = node.Left;
-            ConvertNNFtoDNF(ref left, steps);
-            ConvertNNFtoDNF(ref right, steps);
+            ApplyDistribution(ref left, steps);
+            ApplyDistribution(ref right, steps);
             node.Right = right;
             node.Left = left;
+
+            //// try to apply distribution
+            //if (Rewrite.Distribution(ref node))
+            //{
+            //    if (node.Parent == null)
+            //    {
+            //        Root = node;
+            //    }
+            //    steps.Add(new ConversionStep(ToString(), "Distribution"));
+            //}
         }
 
         bool BasicOperators(BoolExpr node)

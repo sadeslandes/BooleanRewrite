@@ -192,7 +192,7 @@ namespace BooleanRewrite
 
             // convert to DNFList
             var d = new DNFExpression(Root, variables);
-            steps.Add(new ConversionStep(d.ToString(), "Generalize operators"));
+            steps.Add(new ConversionStep(d.ToString(), "Association"));
             d.ConvertToCDNF(steps, reverse);
             return steps;
         }

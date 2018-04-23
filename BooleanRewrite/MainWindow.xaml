@@ -22,7 +22,10 @@
         <DockPanel>
         <Menu DockPanel.Dock="Top">
             <MenuItem Header="_File" IsTabStop="False">
-                <MenuItem Header="Export..." Command="{Binding ExportCommand}"/>
+                <MenuItem Header="Export...">
+                    <MenuItem Header="Left to right" Command="{Binding ExportLeftRightCommand}"/>
+                    <MenuItem Header="Right to left" Command="{Binding ExportRightLeftCommand}"/>
+                </MenuItem>
                 <MenuItem Header="First T.T. Row False" IsCheckable="True" IsChecked="{Binding ReverseOrder}"/>
                 <MenuItem Command="ApplicationCommands.Close"/>
             </MenuItem>

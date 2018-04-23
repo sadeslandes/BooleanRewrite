@@ -251,7 +251,7 @@ namespace BooleanRewrite
             OnPropertyChanged(nameof(Steps2));
         }
 
-        public void Export()
+        public void Export(IEnumerable<ConversionStep> first, IEnumerable<ConversionStep> second)
         {
             var fileDialog = new System.Windows.Forms.SaveFileDialog()
             {
@@ -264,28 +264,43 @@ namespace BooleanRewrite
                 // do work to save file
                 if (!String.IsNullOrEmpty(fileDialog.FileName))
                 {
-                    System.IO.File.WriteAllText(fileDialog.FileName, WriteCSV());
+                    System.IO.File.WriteAllText(fileDialog.FileName, WriteCSV(first, second), Encoding.UTF8);
                 }
             }
         }
 
-        private string WriteCSV()
+        private string WriteCSV(IEnumerable<ConversionStep> first, IEnumerable<ConversionStep> second)
         {
             var stringBuilder = new StringBuilder();
 
-            var enum_steps1 = Steps1.GetEnumerator();
-            var enum_steps2 = Steps2.GetEnumerator();
+            var expressions = first.Select(x => x.Expression).Concat(second.Reverse().Select(x => x.Expression).Skip(1));
+            var justtifications = first.Select(x => x.Justification).Concat(second.Reverse().Select(x => x.Justification).TakeWhile(x => x != "Input"));
+            //var enum_steps2 = Steps2.Reverse().GetEnumerator();
 
-            bool hasElements1 = true;
-            bool hasElements2 = true;
-            while(hasElements1 || hasElements2)
+            //bool hasElements1 = true;
+            //bool hasElements2 = true;
+            //while(hasElements1 || hasElements2)
+            //{
+            //    hasElements1 = enum_steps1.MoveNext();
+            //    hasElements2 = enum_steps2.MoveNext();
+            //    stringBuilder.Append($"{(hasElements1 ? enum_steps1.Current.Expression : " ")}," +
+            //        $"{(hasElements1 ? enum_steps1.Current.Justification : " ")}," +
+            //        $"{(hasElements2 ? enum_steps2.Current.Expression : " ")}," +
+            //        $"{(hasElements2 ? enum_steps2.Current.Justification : " ")}\n");
+            //}
+
+            //while (enum_steps1.MoveNext())
+            //{
+            //    stringBuilder.Append(enum_steps1.Current.Expression + "," + enum_steps1.Current.Justification + "\n");
+            //}
+            //while(enum_steps2.MoveNext())
+            //{
+            //    stringBuilder.Append(enum_steps2.Current.Expression + "," + enum_steps2.Current.Justification + "\n");
+            //}
+
+            foreach(var step in expressions.Zip(justtifications, (exp,jst) => exp+","+jst))
             {
-                hasElements1 = enum_steps1.MoveNext();
-                hasElements2 = enum_steps2.MoveNext();
-                stringBuilder.Append($"{(hasElements1 ? enum_steps1.Current.Expression : " ")}," +
-                    $"{(hasElements1 ? enum_steps1.Current.Justification : " ")}," +
-                    $"{(hasElements2 ? enum_steps2.Current.Expression : " ")}," +
-                    $"{(hasElements2 ? enum_steps2.Current.Justification : " ")}\n");
+                stringBuilder.Append(step + "\n");
             }
 
             return stringBuilder.ToString();
@@ -301,9 +316,14 @@ namespace BooleanRewrite
             }
         }
 
-        public ICommand ExportCommand
+        public ICommand ExportLeftRightCommand
         {
-            get { return new RelayCommand(o => Export()); }
+            get { return new RelayCommand(o => Export(Steps1, Steps2)); }
+        }
+
+        public ICommand ExportRightLeftCommand
+        {
+            get { return new RelayCommand(o => Export(Steps2, Steps1)); }
         }
         #endregion
 

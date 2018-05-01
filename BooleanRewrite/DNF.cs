@@ -6,6 +6,9 @@ using System.Threading.Tasks;
 
 namespace BooleanRewrite
 {
+    /// <summary>
+    /// Represents a propositional logic literal used in a DNFConjunctionGroup
+    /// </summary>
     class DNFLiteral : IComparable<DNFLiteral>
     {
         public string Name;
@@ -19,6 +22,9 @@ namespace BooleanRewrite
         }
     }
 
+    /// <summary>
+    /// Represents a conjunction of literals in a DNFExpression
+    /// </summary>
     class DNFConjunctionGroup : List<DNFLiteral>, IComparable<DNFConjunctionGroup>, IEquatable<DNFConjunctionGroup>
     {
         public DNFConjunctionGroup() : base() { }
@@ -64,9 +70,11 @@ namespace BooleanRewrite
         }
     }
 
+    /// <summary>
+    /// Representation of a DNF expressions. It is simply a collection of DNFConjunctionGroups
+    /// </summary>
     class DNFExpression
     {
-
         private List<DNFConjunctionGroup> expressionList;
         private List<string> variables;
 

@@ -27,8 +27,19 @@ namespace BooleanRewrite
             VariableTextBox.Focus();
         }
 
+        /// <summary>
+        /// Window closing event handler
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void CloseCommandHandler(object sender, ExecutedRoutedEventArgs e) => Close();
 
+        #region button event handlers
+        /// <summary>
+        /// handler for buttons above the left textbox
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void Button_Click(object sender, RoutedEventArgs e)
         {
             if(!String.IsNullOrWhiteSpace(inputBox.SelectedText))
@@ -43,6 +54,11 @@ namespace BooleanRewrite
             inputBox.CaretIndex = index;
         }
 
+        /// <summary>
+        /// handler for buttons above the right text box
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void Button_Click2(object sender, RoutedEventArgs e)
         {
             if (!String.IsNullOrWhiteSpace(inputBox2.SelectedText))
@@ -56,7 +72,13 @@ namespace BooleanRewrite
             inputBox2.Focus();
             inputBox2.CaretIndex = index;
         }
+        #endregion
 
+        /// <summary>
+        /// Shows Help dialog
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void MenuItem_Click(object sender, RoutedEventArgs e)
         {
             MessageBox.Show("1) Enter variable names into \"Variables\" text box, seperated by commas.\n" +

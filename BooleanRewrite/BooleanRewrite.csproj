@@ -75,6 +75,7 @@
     <Compile Include="BoolExpr.cs" />
     <Compile Include="ConversionStep.cs" />
     <Compile Include="DNF.cs" />
+    <Compile Include="FileWriter.cs" />
     <Compile Include="LogicalSymbols.cs" />
     <Compile Include="MainWindowViewModel.cs" />
     <Compile Include="RelayCommand.cs" />

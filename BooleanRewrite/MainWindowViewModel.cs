@@ -109,7 +109,11 @@ namespace BooleanRewrite
         #endregion
 
         #region Methods
-
+        /// <summary>
+        /// replaces keyboard shortcuts with logical symbols
+        /// </summary>
+        /// <param name="input"></param>
+        /// <returns></returns>
         private string ReplaceLogicalSymbols(string input)
         {
             input = input.Replace('&', LogicalSymbols.And);
@@ -138,11 +142,13 @@ namespace BooleanRewrite
 
             if(!String.IsNullOrWhiteSpace(InputText))
             {
-                EvaluateExpression1(variablesList);
+                Steps1 = EvaluateExpression(variablesList, InputText);
+                OnPropertyChanged(nameof(Steps1));
             }
             if(!String.IsNullOrWhiteSpace(InputText2))
             {
-                EvaluateExpression2(variablesList);
+                Steps2 = EvaluateExpression(variablesList, InputText2);
+                OnPropertyChanged(nameof(Steps2));
             }
 
             checkEquivalence();
@@ -171,50 +177,10 @@ namespace BooleanRewrite
             ResultText = String.Empty;
         }
 
-        private void EvaluateExpression1(IEnumerable<string> variables)
+        private IList<ConversionStep> EvaluateExpression(IEnumerable<string> variables, string input)
         {
             List<Token> tokens = null;
-            var stripped = InputText.Replace(" ", String.Empty);
-            try
-            {
-                tokens = Token.Tokenize(stripped, variables);
-            }
-            catch (IllegalCharacterException)
-            {
-                MessageBox.Show("Illegal character detected.\nValid characters include:\n\tAlphanumeric characters and parentheses\n\tUnderscores (\"_\")\n\tOperators: \"!\", \"~\", \"&\", \"|\"\n\nInput cannot end with an operator.");
-                return;
-            }
-            catch (ParenthesisMismatchExeption)
-            {
-                MessageBox.Show("Number of parentheses do not match.");
-                return;
-            }
-            catch (IllegalVariableException e)
-            {
-                MessageBox.Show(e.Message);
-                return;
-            }
-
-
-            AST tree;
-            try
-            {
-                tree = new AST(tokens);
-            }
-            catch (Exception)
-            {
-                MessageBox.Show("Could not parse expression.");
-                return;
-            }
-
-            Steps1 = tree.Evaluate(variables, ReverseOrder);
-            OnPropertyChanged(nameof(Steps1));
-        }
-
-        private void EvaluateExpression2(IEnumerable<string> variables)
-        {
-            List<Token> tokens = null;
-            var stripped = InputText2.Replace(" ", String.Empty);
+            var stripped = input.Replace(" ", String.Empty);
             try
             {
                 tokens = Token.Tokenize(stripped,variables);
@@ -222,17 +188,17 @@ namespace BooleanRewrite
             catch (IllegalCharacterException)
             {
                 MessageBox.Show("Illegal character detected.\nValid characters include:\n\tAlphanumeric characters and parentheses\n\tUnderscores (\"_\")\n\tOperators: \"!\", \"~\", \"&\", \"|\"\n\nInput cannot end with an operator.");
-                return;
+                return new ObservableCollection<ConversionStep>();
             }
             catch (ParenthesisMismatchExeption)
             {
                 MessageBox.Show("Number of parentheses do not match.");
-                return;
+                return new ObservableCollection<ConversionStep>();
             }
             catch (IllegalVariableException e)
             {
                 MessageBox.Show(e.Message);
-                return;
+                return new ObservableCollection<ConversionStep>();
             }
 
 
@@ -244,11 +210,10 @@ namespace BooleanRewrite
             catch (Exception)
             {
                 MessageBox.Show("Could not parse expression.");
-                return;
+                return new ObservableCollection<ConversionStep>();
             }
 
-            Steps2 = tree.Evaluate(variables, ReverseOrder);
-            OnPropertyChanged(nameof(Steps2));
+            return tree.Evaluate(variables, ReverseOrder);
         }
 
         public void Export(IEnumerable<ConversionStep> first, IEnumerable<ConversionStep> second)
@@ -264,46 +229,9 @@ namespace BooleanRewrite
                 // do work to save file
                 if (!String.IsNullOrEmpty(fileDialog.FileName))
                 {
-                    System.IO.File.WriteAllText(fileDialog.FileName, WriteCSV(first, second), Encoding.UTF8);
+                    FileWriter.WriteCSV(fileDialog.FileName, first, second);
                 }
             }
-        }
-
-        private string WriteCSV(IEnumerable<ConversionStep> first, IEnumerable<ConversionStep> second)
-        {
-            var stringBuilder = new StringBuilder();
-
-            var expressions = first.Select(x => x.Expression).Concat(second.Reverse().Select(x => x.Expression).Skip(1));
-            var justtifications = first.Select(x => x.Justification).Concat(second.Reverse().Select(x => x.Justification).TakeWhile(x => x != "Input"));
-            //var enum_steps2 = Steps2.Reverse().GetEnumerator();
-
-            //bool hasElements1 = true;
-            //bool hasElements2 = true;
-            //while(hasElements1 || hasElements2)
-            //{
-            //    hasElements1 = enum_steps1.MoveNext();
-            //    hasElements2 = enum_steps2.MoveNext();
-            //    stringBuilder.Append($"{(hasElements1 ? enum_steps1.Current.Expression : " ")}," +
-            //        $"{(hasElements1 ? enum_steps1.Current.Justification : " ")}," +
-            //        $"{(hasElements2 ? enum_steps2.Current.Expression : " ")}," +
-            //        $"{(hasElements2 ? enum_steps2.Current.Justification : " ")}\n");
-            //}
-
-            //while (enum_steps1.MoveNext())
-            //{
-            //    stringBuilder.Append(enum_steps1.Current.Expression + "," + enum_steps1.Current.Justification + "\n");
-            //}
-            //while(enum_steps2.MoveNext())
-            //{
-            //    stringBuilder.Append(enum_steps2.Current.Expression + "," + enum_steps2.Current.Justification + "\n");
-            //}
-
-            foreach(var step in expressions.Zip(justtifications, (exp,jst) => exp+","+jst))
-            {
-                stringBuilder.Append(step + "\n");
-            }
-
-            return stringBuilder.ToString();
         }
         #endregion
 

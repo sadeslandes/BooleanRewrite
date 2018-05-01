@@ -9,6 +9,9 @@ using System.Threading.Tasks;
 
 namespace BooleanRewrite
 {
+    /// <summary>
+    /// Represents parsing tokens
+    /// </summary>
     public class Token
     {
         static Dictionary<char, KeyValuePair<TokenType, string>> dict = new Dictionary<char, KeyValuePair<TokenType, string>>()
@@ -52,7 +55,16 @@ namespace BooleanRewrite
         public TokenType type;
         public string value;
 
-        Token(StringReader s)
+        /// <summary>
+        /// Regex used for text validation
+        /// </summary>
+        static Regex illegalRegex = new Regex($"[^a-zA-Z0-9()_-{LogicalSymbols.Operators}]");
+        
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="s"></param>
+        private Token(StringReader s)
         {
             int c = s.Read();
             if (c == -1)
@@ -82,6 +94,12 @@ namespace BooleanRewrite
             }
         }
 
+        /// <summary>
+        /// Parses input returning a list of tokens
+        /// </summary>
+        /// <param name="text"></param>
+        /// <param name="variables"></param>
+        /// <returns></returns>
         public static List<Token> Tokenize(string text, IEnumerable<string> variables)
         {
             ValidateInput(text);
@@ -110,7 +128,10 @@ namespace BooleanRewrite
             return polishNotation;
         }
 
-        static Regex illegalRegex = new Regex($"[^a-zA-Z0-9()_-{LogicalSymbols.Operators}]");
+        /// <summary>
+        /// Validates input text
+        /// </summary>
+        /// <param name="text"></param>
         static void ValidateInput(string text)
         {
             var operators = LogicalSymbols.Operators;
@@ -124,6 +145,11 @@ namespace BooleanRewrite
             }
         }
 
+        /// <summary>
+        /// converts infix tokens to prefix tokens
+        /// </summary>
+        /// <param name="infixTokenList"></param>
+        /// <returns></returns>
         static List<Token> TransformToPolishNotation(List<Token> infixTokenList)
         {
             Queue<Token> outputQueue = new Queue<Token>();
@@ -175,6 +201,7 @@ namespace BooleanRewrite
 
     }
 
+    #region Exceptions
     [Serializable]
     internal class IllegalVariableException : Exception
     {
@@ -234,6 +261,6 @@ namespace BooleanRewrite
         {
         }
     }
-
+    #endregion
 
 }

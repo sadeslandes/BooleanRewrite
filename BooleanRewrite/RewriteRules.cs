@@ -1,13 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace BooleanRewrite
+﻿namespace BooleanRewrite
 {
+    /// <summary>
+    /// Contains rewrite rules for implementing various equivalence rules on a tree of BoolExpr objects
+    /// </summary>
     static class Rewrite
     {
+        /// <summary>
+        /// Distributes and over or
+        /// </summary>
+        /// <param name="node"></param>
+        /// <returns></returns>
         public static bool Distribution(ref BoolExpr node)
         {
             if (node.Op == BoolExpr.BOP.AND)
@@ -50,6 +52,11 @@ namespace BooleanRewrite
             return false;
         }
 
+        /// <summary>
+        /// DeMorgan's Law
+        /// </summary>
+        /// <param name="node"></param>
+        /// <returns></returns>
         public static bool DeM(ref BoolExpr node)
         {
             if (node.Op == BoolExpr.BOP.NOT)
@@ -86,6 +93,11 @@ namespace BooleanRewrite
             return false;
         }
 
+        /// <summary>
+        /// Double negation
+        /// </summary>
+        /// <param name="node"></param>
+        /// <returns></returns>
         public static bool DN(ref BoolExpr node)
         {
             if (node.Op == BoolExpr.BOP.NOT && node.Right.Op == BoolExpr.BOP.NOT)
@@ -100,6 +112,11 @@ namespace BooleanRewrite
             return false;
         }
 
+        /// <summary>
+        /// Implication rule
+        /// </summary>
+        /// <param name="node"></param>
+        /// <returns></returns>
         public static bool Implication(ref BoolExpr node)
         {
             if (node.Op == BoolExpr.BOP.CONDITIONAL)
@@ -118,6 +135,11 @@ namespace BooleanRewrite
             return false;
         }
 
+        /// <summary>
+        /// Equivalence rule
+        /// </summary>
+        /// <param name="node"></param>
+        /// <returns></returns>
         public static bool Equivalence(ref BoolExpr node)
         {
             if (node.Op == BoolExpr.BOP.BICONDITIONAL)
@@ -151,6 +173,11 @@ namespace BooleanRewrite
             return false;
         }
 
+        /// <summary>
+        /// Xor brekdown
+        /// </summary>
+        /// <param name="node"></param>
+        /// <returns></returns>
         public static bool XOR(ref BoolExpr node)
         {
             if (node.Op == BoolExpr.BOP.XOR)
@@ -184,6 +211,11 @@ namespace BooleanRewrite
             return false;
         }
 
+        /// <summary>
+        /// Updates the oldNode parent node to point to the new node
+        /// </summary>
+        /// <param name="node"></param>
+        /// <param name="oldNode"></param>
         private static void UpdateParent(BoolExpr node, BoolExpr oldNode)
         {
             if (node.Parent == null || oldNode.Parent == null)

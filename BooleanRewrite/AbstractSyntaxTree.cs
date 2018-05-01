@@ -8,6 +8,9 @@ using System.Collections.ObjectModel;
 
 namespace BooleanRewrite
 {
+    /// <summary>
+    /// Abstract Syntax Tree
+    /// </summary>
     public class AST
     {
         public AST(List<Token> tokens)

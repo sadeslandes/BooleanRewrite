@@ -11,7 +11,6 @@ using System.Windows.Data;
 
 namespace BooleanRewrite
 {
-
     public class ViewModelBase : INotifyPropertyChanged
     {
         public event PropertyChangedEventHandler PropertyChanged;

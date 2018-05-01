@@ -107,7 +107,15 @@ namespace BooleanRewrite
             // No share any object on purpose
             Op = other.Op;
             Left = other.Left == null ? null : new BoolExpr(other.Left);
+            if (Left != null)
+            {
+                Left.Parent = this;
+            }
             Right = other.Right == null ? null : new BoolExpr(other.Right);
+            if (Right != null)
+            {
+                Right.Parent = this;
+            }
             Lit = new StringBuilder(other.Lit).ToString();
         }
 

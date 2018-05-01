@@ -225,7 +225,7 @@ namespace BooleanRewrite
             if (node == null)
                 return;
 
-            if (node.Op != BoolExpr.BOP.OR)
+            if (node.Op != OperatorType.OR)
             {
                 var group = new DNFConjunctionGroup();
                 buildNode(node, group);
@@ -244,13 +244,13 @@ namespace BooleanRewrite
             if (node == null)
                 return;
 
-            if(node.Op == BoolExpr.BOP.LEAF)
+            if(node.Op == OperatorType.LEAF)
             {
                 group.Add(new DNFLiteral() { Name = node.Lit, isNegated = false, priority = variables.IndexOf(node.Lit) });
                 return;
             }
 
-            if (node.Op == BoolExpr.BOP.NOT)
+            if (node.Op == OperatorType.NOT)
             {
                 group.Add(new DNFLiteral() { Name = node.Right.Lit, isNegated = true, priority = variables.IndexOf(node.Right.Lit) });
                 return;

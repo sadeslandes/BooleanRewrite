@@ -30,71 +30,30 @@ namespace BooleanRewrite
         {
             if (polishNotationTokensEnumerator.Current.type == Token.TokenType.LITERAL)
             {
-                BoolExpr lit = BoolExpr.CreateBoolVar(polishNotationTokensEnumerator.Current.value);
+                BoolExpr lit = BoolExprFactory.CreateLiteral(polishNotationTokensEnumerator.Current.value);
                 polishNotationTokensEnumerator.MoveNext();
                 return lit;
             }
-            else
+            else if (polishNotationTokensEnumerator.Current.type == Token.TokenType.NEGATION_OP)
             {
-                if (polishNotationTokensEnumerator.Current.value == "NOT")
-                {
-                    polishNotationTokensEnumerator.MoveNext();
-                    BoolExpr operand = Make(ref polishNotationTokensEnumerator);
-                    var parent = BoolExpr.CreateNot(operand);
-                    operand.Parent = parent;
-                    return parent;
-                }
-                else if (polishNotationTokensEnumerator.Current.value == "AND")
-                {
-                    polishNotationTokensEnumerator.MoveNext();
-                    BoolExpr right = Make(ref polishNotationTokensEnumerator);
-                    BoolExpr left = Make(ref polishNotationTokensEnumerator);
-                    var parent = BoolExpr.CreateAnd(left, right);
-                    left.Parent = parent;
-                    right.Parent = parent;
-                    return parent;
-                }
-                else if (polishNotationTokensEnumerator.Current.value == "OR")
-                {
-                    polishNotationTokensEnumerator.MoveNext();
-                    BoolExpr right = Make(ref polishNotationTokensEnumerator);
-                    BoolExpr left = Make(ref polishNotationTokensEnumerator);
-                    var parent = BoolExpr.CreateOr(left, right);
-                    left.Parent = parent;
-                    right.Parent = parent;
-                    return parent;
-                }
-                else if (polishNotationTokensEnumerator.Current.value == "CONDITIONAL")
-                {
-                    polishNotationTokensEnumerator.MoveNext();
-                    BoolExpr right = Make(ref polishNotationTokensEnumerator);
-                    BoolExpr left = Make(ref polishNotationTokensEnumerator);
-                    var parent = BoolExpr.CreateConditional(left, right);
-                    left.Parent = parent;
-                    right.Parent = parent;
-                    return parent;
-                }
-                else if (polishNotationTokensEnumerator.Current.value == "BICONDITIONAL")
-                {
-                    polishNotationTokensEnumerator.MoveNext();
-                    BoolExpr right = Make(ref polishNotationTokensEnumerator);
-                    BoolExpr left = Make(ref polishNotationTokensEnumerator);
-                    var parent = BoolExpr.CreateBiconditional(left, right);
-                    left.Parent = parent;
-                    right.Parent = parent;
-                    return parent;
-                }
-                else if (polishNotationTokensEnumerator.Current.value == "XOR")
-                {
-                    polishNotationTokensEnumerator.MoveNext();
-                    BoolExpr right = Make(ref polishNotationTokensEnumerator);
-                    BoolExpr left = Make(ref polishNotationTokensEnumerator);
-                    var parent = BoolExpr.CreateXor(left, right);
-                    left.Parent = parent;
-                    right.Parent = parent;
-                    return parent;
-                }
+                polishNotationTokensEnumerator.MoveNext();
+                BoolExpr operand = Make(ref polishNotationTokensEnumerator);
+                var parent = BoolExprFactory.CreateNot(operand);
+                operand.Parent = parent;
+                return parent;
             }
+            else if (polishNotationTokensEnumerator.Current.type == Token.TokenType.BINARY_OP)
+            {
+                polishNotationTokensEnumerator.MoveNext();
+                BoolExpr right = Make(ref polishNotationTokensEnumerator);
+                BoolExpr left = Make(ref polishNotationTokensEnumerator);
+                var parent = BoolExprFactory.CreateBinary(polishNotationTokensEnumerator.Current.value, left, right);
+                left.Parent = parent;
+                right.Parent = parent;
+                return parent;
+            }
+               
+            
             return null;
         }
 
@@ -112,16 +71,16 @@ namespace BooleanRewrite
 
         void PrettyPrintHelper(StringBuilder stringBuilder, BoolExpr node)
         {
-            if (node.Op == BoolExpr.BOP.LEAF)
+            if (node.Op == OperatorType.LEAF)
             {
                 stringBuilder.Append(node.Lit);
             }
-            else if (node.Op == BoolExpr.BOP.NOT)
+            else if (node.Op == OperatorType.NOT)
             {
                 stringBuilder.Append(LogicalSymbols.Not);
                 PrettyPrintHelper(stringBuilder, node.Right);
             }
-            else if (node.Op == BoolExpr.BOP.AND)
+            else if (node.Op == OperatorType.AND)
             {
                 stringBuilder.Append('(');
                 PrettyPrintHelper(stringBuilder, node.Left);
@@ -129,7 +88,7 @@ namespace BooleanRewrite
                 PrettyPrintHelper(stringBuilder, node.Right);
                 stringBuilder.Append(')');
             }
-            else if (node.Op == BoolExpr.BOP.OR)
+            else if (node.Op == OperatorType.OR)
             {
                 stringBuilder.Append('(');
                 PrettyPrintHelper(stringBuilder, node.Left);
@@ -137,7 +96,7 @@ namespace BooleanRewrite
                 PrettyPrintHelper(stringBuilder, node.Right);
                 stringBuilder.Append(')');
             }
-            else if (node.Op == BoolExpr.BOP.CONDITIONAL)
+            else if (node.Op == OperatorType.CONDITIONAL)
             {
                 stringBuilder.Append('(');
                 PrettyPrintHelper(stringBuilder, node.Left);
@@ -145,7 +104,7 @@ namespace BooleanRewrite
                 PrettyPrintHelper(stringBuilder, node.Right);
                 stringBuilder.Append(')');
             }
-            else if (node.Op == BoolExpr.BOP.BICONDITIONAL)
+            else if (node.Op == OperatorType.BICONDITIONAL)
             {
                 stringBuilder.Append('(');
                 PrettyPrintHelper(stringBuilder, node.Left);
@@ -153,7 +112,7 @@ namespace BooleanRewrite
                 PrettyPrintHelper(stringBuilder, node.Right);
                 stringBuilder.Append(')');
             }
-            else if (node.Op == BoolExpr.BOP.XOR)
+            else if (node.Op == OperatorType.XOR)
             {
                 stringBuilder.Append('(');
                 PrettyPrintHelper(stringBuilder, node.Left);
@@ -202,7 +161,7 @@ namespace BooleanRewrite
 
         void ConvertOperators(ref BoolExpr node, IList<ConversionStep> steps)
         {
-            if (node == null || node.Op == BoolExpr.BOP.LEAF)
+            if (node == null || node.Op == OperatorType.LEAF)
                 return;
 
             if(Rewrite.Implication(ref node))
@@ -242,7 +201,7 @@ namespace BooleanRewrite
 
         void ConvertToNNF(ref BoolExpr node, IList<ConversionStep> steps)
         {
-            if (node == null || node.Op == BoolExpr.BOP.LEAF)
+            if (node == null || node.Op == OperatorType.LEAF)
                 return;
 
             // try to apply DN as many times as possible
@@ -284,7 +243,7 @@ namespace BooleanRewrite
 
         void ApplyDistribution(ref BoolExpr node, IList<ConversionStep> steps)
         {
-            if (node == null || node.Op == BoolExpr.BOP.LEAF)
+            if (node == null || node.Op == OperatorType.LEAF)
                 return;
 
             // try to apply distribution
@@ -308,13 +267,13 @@ namespace BooleanRewrite
         {
             switch (node.Op)
             {
-                case BoolExpr.BOP.LEAF:
+                case OperatorType.LEAF:
                     return true;
-                case BoolExpr.BOP.AND:
+                case OperatorType.AND:
                     return BasicOperators(node.Right) && BasicOperators(node.Left);
-                case BoolExpr.BOP.OR:
+                case OperatorType.OR:
                     return BasicOperators(node.Right) && BasicOperators(node.Left);
-                case BoolExpr.BOP.NOT:
+                case OperatorType.NOT:
                     return BasicOperators(node.Right);
                 default:
                     return false;
@@ -325,14 +284,14 @@ namespace BooleanRewrite
         {
             switch (node.Op)
             {
-                case BoolExpr.BOP.LEAF:
+                case OperatorType.LEAF:
                     return true;
-                case BoolExpr.BOP.AND:
+                case OperatorType.AND:
                     return IsDNF(node.Right) && IsDNF(node.Left);
-                case BoolExpr.BOP.OR:
-                    return  (node.Parent == null || node.Parent.Op == BoolExpr.BOP.OR) && IsDNF(node.Right) && IsDNF(node.Left);
-                case BoolExpr.BOP.NOT:
-                    return node.Right.Op == BoolExpr.BOP.LEAF;
+                case OperatorType.OR:
+                    return  (node.Parent == null || node.Parent.Op == OperatorType.OR) && IsDNF(node.Right) && IsDNF(node.Left);
+                case OperatorType.NOT:
+                    return node.Right.Op == OperatorType.LEAF;
                 default:
                     return false;
             }
@@ -342,13 +301,13 @@ namespace BooleanRewrite
         {
             switch (node.Op)
             {
-                case BoolExpr.BOP.LEAF:
+                case OperatorType.LEAF:
                     return true;
-                case BoolExpr.BOP.AND:
-                case BoolExpr.BOP.OR:
+                case OperatorType.AND:
+                case OperatorType.OR:
                     return IsNNF(node.Right) && IsNNF(node.Left);
-                case BoolExpr.BOP.NOT:
-                    return node.Right.Op == BoolExpr.BOP.LEAF;
+                case OperatorType.NOT:
+                    return node.Right.Op == OperatorType.LEAF;
                 default:
                     return false;
             }

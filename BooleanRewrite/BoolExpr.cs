@@ -6,24 +6,20 @@ using System.Threading.Tasks;
 
 namespace BooleanRewrite
 {
-    public class BoolExpr
+    public enum OperatorType
     {
-        public enum BOP
-        {
-            LEAF,
-            AND,
-            OR,
-            NOT,
-            CONDITIONAL,
-            BICONDITIONAL,
-            XOR
-        };
+        LEAF,
+        AND,
+        OR,
+        NOT,
+        CONDITIONAL,
+        BICONDITIONAL,
+        XOR
+    };
 
-        //
-        //  private constructor
-        //
-
-        private BoolExpr(BOP op, BoolExpr left, BoolExpr right)
+    public abstract class BoolExpr : ICloneable
+    {
+        protected BoolExpr(OperatorType op, BoolExpr left, BoolExpr right)
         {
             Op = op;
             Left = left;
@@ -32,9 +28,9 @@ namespace BooleanRewrite
             Parent = null;
         }
 
-        private BoolExpr(String literal)
+        protected BoolExpr(String literal)
         {
-            Op = BOP.LEAF;
+            Op = OperatorType.LEAF;
             Left = null;
             Right = null;
             Lit = literal;
@@ -45,7 +41,7 @@ namespace BooleanRewrite
         //  accessor
         //
 
-        public BOP Op { get; set; }
+        public OperatorType Op { get; set; }
 
         public BoolExpr Left { get; set; }
 
@@ -55,54 +51,25 @@ namespace BooleanRewrite
 
         public String Lit { get; set; }
 
-        //
-        //  public factory
-        //
-
-        public static BoolExpr CreateAnd(BoolExpr left, BoolExpr right)
-        {
-            return new BoolExpr(BOP.AND, left, right);
-        }
-
-        public static BoolExpr CreateNot(BoolExpr child)
-        {
-            return new BoolExpr(BOP.NOT, null, child);
-        }
-
-        public static BoolExpr CreateOr(BoolExpr left, BoolExpr right)
-        {
-            return new BoolExpr(BOP.OR, left, right);
-        }
-
-        public static BoolExpr CreateConditional(BoolExpr left, BoolExpr right)
-        {
-            return new BoolExpr(BOP.CONDITIONAL, left, right);
-        }
-
-        public static BoolExpr CreateBiconditional(BoolExpr left, BoolExpr right)
-        {
-            return new BoolExpr(BOP.BICONDITIONAL, left, right);
-        }
-
-        public static BoolExpr CreateXor(BoolExpr left, BoolExpr right)
-        {
-            return new BoolExpr(BOP.XOR, left, right);
-        }
-
-        public static BoolExpr CreateBoolVar(String str)
-        {
-            return new BoolExpr(str);
-        }
-
-        public static BoolExpr CreateContradiction()
-        {
-            return new BoolExpr(LogicalSymbols.Contradiction.ToString());
-        }
-
         
 
+        //
+        //  state checker
+        //
 
-        public BoolExpr(BoolExpr other)
+        public bool IsLeaf()
+        {
+            return (Op == OperatorType.LEAF);
+        }
+
+        public bool IsLiteral()
+        {
+            return (IsLeaf() || (Op == OperatorType.NOT && Right.IsLeaf()));
+        }
+
+        public bool IsContradiction() => Lit == LogicalSymbols.Contradiction.ToString();
+
+        protected BoolExpr(BoolExpr other)
         {
             // No share any object on purpose
             Op = other.Op;
@@ -111,44 +78,109 @@ namespace BooleanRewrite
             Lit = new StringBuilder(other.Lit).ToString();
         }
 
-        //
-        //  state checker
-        //
+        public abstract object Clone();
 
-        public bool IsLeaf()
+    }
+
+    static class BoolExprFactory
+    {
+        public static BoolExpr CreateCopy(BoolExpr other)
         {
-            return (Op == BOP.LEAF);
-        }
-
-        public bool IsLiteral()
-        {
-            return (IsLeaf() || (Op == BOP.NOT && Right.IsLeaf()));
-        }
-
-        public bool IsContradiction() => Lit == LogicalSymbols.Contradiction.ToString();
-
-        // unsused test
-        public bool IsContradiction2()
-        {
-            if(this.Op == BOP.AND)
+            switch (other.Op)
             {
-                if(this.Right.Op == BOP.NOT)
-                {
-                    if(this.Right.Right == this.Left)
-                    {
-                        return true;
-                    }
-                }
-                if (this.Left.Op == BOP.NOT)
-                {
-                    if (this.Left.Right == this.Right)
-                    {
-                        return true;
-                    }
-                }
+                case OperatorType.LEAF:
+                    return CreateLiteral(other.Lit);
+                case OperatorType.AND:
+                    return new BoolExprConjunction(CreateCopy(other.Left), CreateCopy(other.Right));
+                case OperatorType.OR:
+                    break;
+                case OperatorType.NOT:
+                    break;
+                case OperatorType.CONDITIONAL:
+                    break;
+                case OperatorType.BICONDITIONAL:
+                    break;
+                case OperatorType.XOR:
+                    break;
+                default:
+                    return null;
             }
-            return false;
         }
-        
+
+        public static BoolExpr CreateLiteral(string literal) => new BoolExprLiteral(literal);
+        public static BoolExpr CreateNot(BoolExpr child) => new BoolExprNegation(child);
+
+        public static BoolExpr CreateBinary(string op, BoolExpr left, BoolExpr right)
+        {
+            switch (op)
+            {
+                case "AND":
+                    return new BoolExprConjunction(left, right);
+                case "OR":
+                    return new BoolExprDisjunction(left, right);
+                case "CONDITIONAL":
+                    return new BoolExprConditional(left, right);
+                case "BICONDITIONAL":
+                    return new BoolExprBiconditional(left, right);
+                case "XOR":
+                    return new BoolExprXOR(left, right);
+                default:
+                    throw new Exception();
+            }
+        }
+
+        public static BoolExpr CreateContradiction() => new BoolExprLiteral(LogicalSymbols.Contradiction.ToString());
+    }
+
+    class BoolExprLiteral : BoolExpr
+    {
+        public BoolExprLiteral(string literal) : base(literal)
+        {     
+        }
+    }
+
+    class BoolExprNegation : BoolExpr
+    {
+        public BoolExprNegation(BoolExpr child) : base(OperatorType.NOT, null, child)
+        {
+        }
+    }
+
+    class BoolExprConjunction : BoolExpr
+    {
+        public BoolExprConjunction(BoolExpr left, BoolExpr right) : base(OperatorType.AND, left, right)
+        {
+        }
+    }
+
+    class BoolExprDisjunction : BoolExpr
+    {
+        public BoolExprDisjunction(BoolExpr left, BoolExpr right) : base(OperatorType.AND, left, right)
+        {
+        }
+    }
+
+    class BoolExprConditional : BoolExpr
+    {
+        public BoolExprConditional(BoolExpr left, BoolExpr right) : base(OperatorType.AND, left, right)
+        {
+        }
+    }
+
+    class BoolExprBiconditional : BoolExpr
+    {
+        public BoolExprBiconditional(BoolExpr left, BoolExpr right) : base(OperatorType.AND, left, right)
+        {
+        }
+    }
+
+    class BoolExprXOR : BoolExpr
+    {
+        public BoolExprXOR(BoolExpr left, BoolExpr right) : base(OperatorType.AND, left, right)
+        {
+        }
     }
 }
+
+
+

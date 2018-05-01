@@ -23,22 +23,22 @@ namespace BooleanRewrite
                 ')', new KeyValuePair<TokenType, string>(TokenType.CLOSE_PAREN, ")")
             },
             {
-                LogicalSymbols.Not, new KeyValuePair<TokenType, string>(TokenType.NEGATION_OP, "NOT")
+                LogicalSymbols.Not, new KeyValuePair<TokenType, string>(TokenType.NEGATION_OP, OperatorType.NOT.ToString())
             },
             {
-                LogicalSymbols.And, new KeyValuePair<TokenType, string>(TokenType.BINARY_OP, "AND")
+                LogicalSymbols.And, new KeyValuePair<TokenType, string>(TokenType.BINARY_OP, OperatorType.AND.ToString())
             },
             {
-                LogicalSymbols.Or, new KeyValuePair<TokenType, string>(TokenType.BINARY_OP, "OR")
+                LogicalSymbols.Or, new KeyValuePair<TokenType, string>(TokenType.BINARY_OP, OperatorType.OR.ToString())
             },
             {
-                LogicalSymbols.Conditional, new KeyValuePair<TokenType, string>(TokenType.BINARY_OP, "CONDITIONAL")
+                LogicalSymbols.Conditional, new KeyValuePair<TokenType, string>(TokenType.BINARY_OP, OperatorType.CONDITIONAL.ToString())
             },
             {
-                LogicalSymbols.Biconditional, new KeyValuePair<TokenType, string>(TokenType.BINARY_OP, "BICONDITIONAL")
+                LogicalSymbols.Biconditional, new KeyValuePair<TokenType, string>(TokenType.BINARY_OP, OperatorType.BICONDITIONAL.ToString())
             },
             {
-                LogicalSymbols.XOr, new KeyValuePair<TokenType, string>(TokenType.BINARY_OP, "XOR")
+                LogicalSymbols.XOr, new KeyValuePair<TokenType, string>(TokenType.BINARY_OP, OperatorType.XOR.ToString())
             }
         };
 
@@ -51,6 +51,7 @@ namespace BooleanRewrite
             LITERAL,
             EXPR_END
         }
+
 
         public TokenType type;
         public string value;

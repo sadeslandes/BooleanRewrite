@@ -134,4 +134,7 @@
     </BootstrapperPackage>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PostBuildEvent>if $(ConfigurationName) == Release copy "$(TargetPath)" $(SolutionDir)</PostBuildEvent>
+  </PropertyGroup>
 </Project>

@@ -78,6 +78,11 @@ namespace BooleanRewrite
     #region Factory
     static class BoolExprFactory
     {
+        /// <summary>
+        /// Deep copy of BoolExpr
+        /// </summary>
+        /// <param name="other"></param>
+        /// <returns></returns>
         public static BoolExpr CreateCopy(BoolExpr other)
         {
             switch (other.Op)

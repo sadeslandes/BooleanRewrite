@@ -240,7 +240,7 @@ namespace BooleanRewrite
         {
             get
             {
-                return new RelayCommand(o=>Evaluate()/*, o=>!String.IsNullOrEmpty(Variables)*/);
+                return new RelayCommand(o=>Evaluate());
             }
         }
 

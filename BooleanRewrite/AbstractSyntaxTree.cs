@@ -26,6 +26,11 @@ namespace BooleanRewrite
             set;
         }
 
+        /// <summary>
+        /// Builds the Abstract Syntax Tree
+        /// </summary>
+        /// <param name="polishNotationTokensEnumerator"></param>
+        /// <returns></returns>
         BoolExpr Make(ref List<Token>.Enumerator polishNotationTokensEnumerator)
         {
             if (polishNotationTokensEnumerator.Current.type == Token.TokenType.LITERAL)
@@ -44,10 +49,11 @@ namespace BooleanRewrite
             }
             else if (polishNotationTokensEnumerator.Current.type == Token.TokenType.BINARY_OP)
             {
+                string op = polishNotationTokensEnumerator.Current.value;
                 polishNotationTokensEnumerator.MoveNext();
                 BoolExpr right = Make(ref polishNotationTokensEnumerator);
                 BoolExpr left = Make(ref polishNotationTokensEnumerator);
-                var parent = BoolExprFactory.CreateBinary(polishNotationTokensEnumerator.Current.value, left, right);
+                var parent = BoolExprFactory.CreateBinary(op, left, right);
                 left.Parent = parent;
                 right.Parent = parent;
                 return parent;
@@ -59,69 +65,15 @@ namespace BooleanRewrite
 
         public override string ToString()
         {
-            StringBuilder output = new StringBuilder();
-
-            PrettyPrintHelper(output, Root);
-            if (Char.IsWhiteSpace(output[0]))
-            {
-                output.Remove(0, 1);
-            }
-            return output.ToString();
+            return Root.ToString();
         }
 
-        void PrettyPrintHelper(StringBuilder stringBuilder, BoolExpr node)
-        {
-            if (node.Op == OperatorType.LEAF)
-            {
-                stringBuilder.Append(node.Lit);
-            }
-            else if (node.Op == OperatorType.NOT)
-            {
-                stringBuilder.Append(LogicalSymbols.Not);
-                PrettyPrintHelper(stringBuilder, node.Right);
-            }
-            else if (node.Op == OperatorType.AND)
-            {
-                stringBuilder.Append('(');
-                PrettyPrintHelper(stringBuilder, node.Left);
-                stringBuilder.Append(LogicalSymbols.And);
-                PrettyPrintHelper(stringBuilder, node.Right);
-                stringBuilder.Append(')');
-            }
-            else if (node.Op == OperatorType.OR)
-            {
-                stringBuilder.Append('(');
-                PrettyPrintHelper(stringBuilder, node.Left);
-                stringBuilder.Append(LogicalSymbols.Or);
-                PrettyPrintHelper(stringBuilder, node.Right);
-                stringBuilder.Append(')');
-            }
-            else if (node.Op == OperatorType.CONDITIONAL)
-            {
-                stringBuilder.Append('(');
-                PrettyPrintHelper(stringBuilder, node.Left);
-                stringBuilder.Append(LogicalSymbols.Conditional);
-                PrettyPrintHelper(stringBuilder, node.Right);
-                stringBuilder.Append(')');
-            }
-            else if (node.Op == OperatorType.BICONDITIONAL)
-            {
-                stringBuilder.Append('(');
-                PrettyPrintHelper(stringBuilder, node.Left);
-                stringBuilder.Append(LogicalSymbols.Biconditional);
-                PrettyPrintHelper(stringBuilder, node.Right);
-                stringBuilder.Append(')');
-            }
-            else if (node.Op == OperatorType.XOR)
-            {
-                stringBuilder.Append('(');
-                PrettyPrintHelper(stringBuilder, node.Left);
-                stringBuilder.Append(LogicalSymbols.XOr);
-                PrettyPrintHelper(stringBuilder, node.Right);
-                stringBuilder.Append(')');
-            }
-        }
-
+        /// <summary>
+        /// Converts the tree to CDNF
+        /// </summary>
+        /// <param name="variables"></param>
+        /// <param name="reverse"></param>
+        /// <returns></returns>
         public IList<ConversionStep> Evaluate(IEnumerable<string> variables, bool reverse = false)
         {
             BoolExpr root;
@@ -159,6 +111,11 @@ namespace BooleanRewrite
             return steps;
         }
 
+        /// <summary>
+        /// Converts expression to only use negation, conjunction, and disjunction operators
+        /// </summary>
+        /// <param name="node"></param>
+        /// <param name="steps"></param>
         void ConvertOperators(ref BoolExpr node, IList<ConversionStep> steps)
         {
             if (node == null || node.Op == OperatorType.LEAF)
@@ -199,6 +156,11 @@ namespace BooleanRewrite
             node.Left = left;
         }
 
+        /// <summary>
+        /// Converts expression to negation normal form
+        /// </summary>
+        /// <param name="node"></param>
+        /// <param name="steps"></param>
         void ConvertToNNF(ref BoolExpr node, IList<ConversionStep> steps)
         {
             if (node == null || node.Op == OperatorType.LEAF)
@@ -233,6 +195,11 @@ namespace BooleanRewrite
             node.Left = left;
         }
 
+        /// <summary>
+        /// Converts expression to disjunctive normal form
+        /// </summary>
+        /// <param name="root"></param>
+        /// <param name="steps"></param>
         void ConvertNNFtoDNF(ref BoolExpr root, IList<ConversionStep> steps)
         {
             while(!IsDNF(Root))
@@ -241,6 +208,11 @@ namespace BooleanRewrite
             }
         }
 
+        /// <summary>
+        /// Applies the distribution rule to an expression
+        /// </summary>
+        /// <param name="node"></param>
+        /// <param name="steps"></param>
         void ApplyDistribution(ref BoolExpr node, IList<ConversionStep> steps)
         {
             if (node == null || node.Op == OperatorType.LEAF)
@@ -263,6 +235,11 @@ namespace BooleanRewrite
             node.Left = left;
         }
 
+        /// <summary>
+        /// Checks wheter the only operators used in the expression are the negation, disjunction, and conjunction operators
+        /// </summary>
+        /// <param name="node"></param>
+        /// <returns></returns>
         bool BasicOperators(BoolExpr node)
         {
             switch (node.Op)
@@ -280,6 +257,11 @@ namespace BooleanRewrite
             }
         }
 
+        /// <summary>
+        /// Checks whether the expression is in DNF
+        /// </summary>
+        /// <param name="node"></param>
+        /// <returns></returns>
         bool IsDNF(BoolExpr node)
         {
             switch (node.Op)
@@ -297,6 +279,11 @@ namespace BooleanRewrite
             }
         }
 
+        /// <summary>
+        /// Checks whether the expression is in NNF
+        /// </summary>
+        /// <param name="node"></param>
+        /// <returns></returns>
         bool IsNNF(BoolExpr node)
         {
             switch (node.Op)

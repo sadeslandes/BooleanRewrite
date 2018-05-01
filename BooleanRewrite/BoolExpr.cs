@@ -17,8 +17,13 @@ namespace BooleanRewrite
         XOR
     };
 
-    public abstract class BoolExpr : ICloneable
+    #region Base Type
+    public abstract class BoolExpr
     {
+        //
+        // constructors
+        //
+
         protected BoolExpr(OperatorType op, BoolExpr left, BoolExpr right)
         {
             Op = op;
@@ -51,8 +56,6 @@ namespace BooleanRewrite
 
         public String Lit { get; set; }
 
-        
-
         //
         //  state checker
         //
@@ -69,19 +72,10 @@ namespace BooleanRewrite
 
         public bool IsContradiction() => Lit == LogicalSymbols.Contradiction.ToString();
 
-        protected BoolExpr(BoolExpr other)
-        {
-            // No share any object on purpose
-            Op = other.Op;
-            Left = other.Left == null ? null : new BoolExpr(other.Left);
-            Right = other.Right == null ? null : new BoolExpr(other.Right);
-            Lit = new StringBuilder(other.Lit).ToString();
-        }
-
-        public abstract object Clone();
-
     }
+    #endregion
 
+    #region Factory
     static class BoolExprFactory
     {
         public static BoolExpr CreateCopy(BoolExpr other)
@@ -90,18 +84,23 @@ namespace BooleanRewrite
             {
                 case OperatorType.LEAF:
                     return CreateLiteral(other.Lit);
-                case OperatorType.AND:
-                    return new BoolExprConjunction(CreateCopy(other.Left), CreateCopy(other.Right));
-                case OperatorType.OR:
-                    break;
                 case OperatorType.NOT:
-                    break;
+                { // keep copy variable local to this case only
+                    var copy = new BoolExprNegation(CreateCopy(other.Right));
+                    copy.Right.Parent = copy;
+                    return copy;
+                }
+                case OperatorType.AND:
+                case OperatorType.OR:
                 case OperatorType.CONDITIONAL:
-                    break;
                 case OperatorType.BICONDITIONAL:
-                    break;
                 case OperatorType.XOR:
-                    break;
+                { // keep copy variable local to this case only
+                    var copy =  CreateBinary(other.Op.ToString(), CreateCopy(other.Left), CreateCopy(other.Right));
+                    copy.Left.Parent = copy;
+                    copy.Right.Parent = copy;
+                    return copy;
+                }
                 default:
                     return null;
             }
@@ -131,11 +130,30 @@ namespace BooleanRewrite
 
         public static BoolExpr CreateContradiction() => new BoolExprLiteral(LogicalSymbols.Contradiction.ToString());
     }
+    #endregion
+
+    #region Derived Types
+    public abstract class BoolExprBinary : BoolExpr
+    {
+        public BoolExprBinary(OperatorType op, BoolExpr left, BoolExpr right) : base(op,left,right)
+        {
+        }
+
+        public override string ToString()
+        {
+            return $"({Left.ToString()}{Lit}{Right.ToString()})";
+        }
+    }
 
     class BoolExprLiteral : BoolExpr
     {
         public BoolExprLiteral(string literal) : base(literal)
         {     
+        }
+
+        public override string ToString()
+        {
+            return Lit;
         }
     }
 
@@ -144,42 +162,53 @@ namespace BooleanRewrite
         public BoolExprNegation(BoolExpr child) : base(OperatorType.NOT, null, child)
         {
         }
+
+        public override string ToString()
+        {
+            return LogicalSymbols.Not + Right.ToString();
+        }
     }
 
-    class BoolExprConjunction : BoolExpr
+    class BoolExprConjunction : BoolExprBinary
     {
         public BoolExprConjunction(BoolExpr left, BoolExpr right) : base(OperatorType.AND, left, right)
         {
+            Lit = LogicalSymbols.And.ToString();
         }
     }
 
-    class BoolExprDisjunction : BoolExpr
+    class BoolExprDisjunction : BoolExprBinary
     {
-        public BoolExprDisjunction(BoolExpr left, BoolExpr right) : base(OperatorType.AND, left, right)
+        public BoolExprDisjunction(BoolExpr left, BoolExpr right) : base(OperatorType.OR, left, right)
         {
+            Lit = LogicalSymbols.Or.ToString();
         }
     }
 
-    class BoolExprConditional : BoolExpr
+    class BoolExprConditional : BoolExprBinary
     {
-        public BoolExprConditional(BoolExpr left, BoolExpr right) : base(OperatorType.AND, left, right)
+        public BoolExprConditional(BoolExpr left, BoolExpr right) : base(OperatorType.CONDITIONAL, left, right)
         {
+            Lit = LogicalSymbols.Conditional.ToString();
         }
     }
 
-    class BoolExprBiconditional : BoolExpr
+    class BoolExprBiconditional : BoolExprBinary
     {
-        public BoolExprBiconditional(BoolExpr left, BoolExpr right) : base(OperatorType.AND, left, right)
+        public BoolExprBiconditional(BoolExpr left, BoolExpr right) : base(OperatorType.BICONDITIONAL, left, right)
         {
+            Lit = LogicalSymbols.Biconditional.ToString();
         }
     }
 
-    class BoolExprXOR : BoolExpr
+    class BoolExprXOR : BoolExprBinary
     {
-        public BoolExprXOR(BoolExpr left, BoolExpr right) : base(OperatorType.AND, left, right)
+        public BoolExprXOR(BoolExpr left, BoolExpr right) : base(OperatorType.XOR, left, right)
         {
+            Lit = LogicalSymbols.XOr.ToString();
         }
     }
+    #endregion
 }
 
 

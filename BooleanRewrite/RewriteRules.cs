@@ -16,34 +16,41 @@
             {
                 if (node.Right.Op == OperatorType.OR)
                 {
-                    DistributionHelper(ref node);
+                    var oldRight = node.Right;
+                    var oldLeft = node.Left;
+                    var oldNode = node;
+
+                    var left = new BoolExprConjunction(oldLeft, oldRight.Left);
+                    var right = new BoolExprConjunction(oldLeft, oldRight.Right);
+
+                    node = new BoolExprDisjunction(left, right);
+                    node.Parent = oldNode.Parent;
+                    left.Parent = node;
+                    right.Parent = node;
+
+                    UpdateParent(node, oldNode);
                     return true;
                 }
                 else if (node.Left.Op == OperatorType.OR)
                 {
-                    DistributionHelper(ref node);
+                    var oldRight = node.Right;
+                    var oldLeft = node.Left;
+                    var oldNode = node;
+
+                    var left = new BoolExprConjunction(oldLeft.Left, oldRight);
+                    var right = new BoolExprConjunction(oldLeft.Right, oldRight);
+
+                    node = new BoolExprDisjunction(left, right);
+                    node.Parent = oldNode.Parent;
+                    left.Parent = node;
+                    right.Parent = node;
+
+                    UpdateParent(node, oldNode);
                     return true;
                 }
             }
             return false;
         }
-        private static void DistributionHelper(ref BoolExpr node)
-        {
-            var oldRight = node.Right;
-            var oldLeft = node.Left;
-            var oldNode = node;
-
-            var left = new BoolExprConjunction(oldLeft.Left, oldRight);
-            var right = new BoolExprConjunction(oldLeft.Right, oldRight);
-
-            node = new BoolExprDisjunction(left, right);
-            node.Parent = oldNode.Parent;
-            left.Parent = node;
-            right.Parent = node;
-
-            UpdateParent(node, oldNode);
-        }
-
 
         /// <summary>
         /// DeMorgan's Law
@@ -56,29 +63,34 @@
             {
                 if (node.Right.Op == OperatorType.AND)
                 {
-                    DeMHelper(ref node);
+                    var oldNode = node;
+                    var temp = node.Right;
+                    var left = new BoolExprNegation(temp.Left);
+                    var right = new BoolExprNegation(temp.Right);
+                    node = new BoolExprDisjunction(left, right);
+                    node.Parent = oldNode.Parent;
+                    left.Parent = node;
+                    right.Parent = node;
+
+                    UpdateParent(node, oldNode);
                     return true;
                 }
                 else if (node.Right.Op == OperatorType.OR)
                 {
-                    DeMHelper(ref node);
+                    var oldNode = node;
+                    var temp = node.Right;
+                    var left = new BoolExprNegation(temp.Left);
+                    var right = new BoolExprNegation(temp.Right);
+                    node = new BoolExprConjunction(left, right);
+                    node.Parent = oldNode.Parent;
+                    left.Parent = node;
+                    right.Parent = node;
+
+                    UpdateParent(node, oldNode);
                     return true;
                 }
             }
             return false;
-        }
-        private static void DeMHelper(ref BoolExpr node)
-        {
-            var oldNode = node;
-            var temp = node.Right;
-            var left = new BoolExprNegation(temp.Left);
-            var right = new BoolExprNegation(temp.Right);
-            node = new BoolExprDisjunction(left, right);
-            node.Parent = oldNode.Parent;
-            left.Parent = node;
-            right.Parent = node;
-
-            UpdateParent(node, oldNode);
         }
 
         /// <summary>
@@ -134,8 +146,8 @@
             {
                 var oldNode = node;
 
-                var copyLeft = new BoolExpr(node.Left);
-                var copyRight = new BoolExpr(node.Right);
+                var copyLeft = BoolExprFactory.CreateCopy(node.Left);
+                var copyRight = BoolExprFactory.CreateCopy(node.Right);
                 var negatedLeft = new BoolExprNegation(copyLeft);
                 var negatedRight = new BoolExprNegation(copyRight);
                 copyLeft.Parent = negatedLeft;
@@ -172,8 +184,8 @@
             {
                 var oldNode = node;
 
-                var copyLeft = new BoolExpr(node.Left);
-                var copyRight = new BoolExpr(node.Right);
+                var copyLeft = BoolExprFactory.CreateCopy(node.Left);
+                var copyRight = BoolExprFactory.CreateCopy(node.Right);
                 var negatedLeft = new BoolExprNegation(copyLeft);
                 var negatedRight = new BoolExprNegation(copyRight);
                 copyLeft.Parent = negatedLeft;
